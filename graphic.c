@@ -1,9 +1,9 @@
 #include "mkpack.h"
 
 void init_screen(unsigned char *vram, int xs, int ys) {
-	draw_box(vram, xs, 0,  0,     0,      xs -  1, ys - 29);
-	draw_box(vram, xs, 13,  0,     ys - 28, xs -  1, ys - 28);
-	draw_box(vram, xs, 12,  0,     ys - 27, xs -  1, ys - 27);
+	draw_box(vram, xs, 10,  0,     0,      xs -  1, ys - 27);//主桌面
+	// draw_box(vram, xs, 13,  0,     ys - 28, xs -  1, ys - 28);
+	// draw_box(vram, xs, 12,  0,     ys - 27, xs -  1, ys - 27);
 	draw_box(vram, xs, 11,  0,     ys - 26, xs -  1, ys -  1);
 
 	draw_box(vram, xs, 10,  3,     ys - 24, 59,     ys - 24);
