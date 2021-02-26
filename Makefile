@@ -1,7 +1,7 @@
 TOOLPATH = ../z_tools/
 INCPATH  = ../z_tools/haribote/
 
-OBJS_MP = mkpack.obj func.obj
+OBJS_MP = mkpack.obj func.obj graphic.obj tools.obj
 
 DEL = del
 

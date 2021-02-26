@@ -1,9 +1,9 @@
-void io_hlt(void);
+#include "mkpack.h"
 
 void HariMain(void) {
-	int i;
-	char *p=0xa0000;
-	for (i=0;i<=0x0ffff;i++) {
-		p[i] = i&0x0f;
-	}
+	struct BootInfo *btif = (struct BootInfo*) 0x0ff0;
+	init_palette();
+	init_screen(btif->vram, btif->xs, btif->ys);
+	fin();
 }
+
