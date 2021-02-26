@@ -7,6 +7,10 @@
 
 [SECTION .text] ;正式函数
 
-_io_hlt:	; void io_hlt(void);
+_io_hlt: ; void io_hlt(void);
 	HLT
+	RET
+
+_io_cli: ; void io_cli(void)
+	CLI
 	RET
