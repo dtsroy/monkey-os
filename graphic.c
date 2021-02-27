@@ -1,22 +1,10 @@
 #include "mkpack.h"
 
 void init_screen(unsigned char *vram, int xs, int ys) {
-	draw_box(vram, xs, 10,  0,     0,      xs -  1, ys - 27);//主桌面
-	// draw_box(vram, xs, 13,  0,     ys - 28, xs -  1, ys - 28);
-	// draw_box(vram, xs, 12,  0,     ys - 27, xs -  1, ys - 27);
-	draw_box(vram, xs, 11,  0,     ys - 26, xs -  1, ys -  1);
-
-	draw_box(vram, xs, 10,  3,     ys - 24, 59,     ys - 24);
-	draw_box(vram, xs, 9,  2,     ys - 24,  2,     ys -  4);
-	draw_box(vram, xs, 8,  3,     ys -  4, 59,     ys -  4);
-	draw_box(vram, xs, 7, 59,     ys - 23, 59,     ys -  5);
-	draw_box(vram, xs, 6,  2,     ys -  3, 59,     ys -  3);
-	draw_box(vram, xs, 5, 60,     ys - 24, 60,     ys -  3);
-
-	draw_box(vram, xs, 4, xs - 47, ys - 24, xs -  4, ys - 24);
-	draw_box(vram, xs, 3, xs - 47, ys - 23, xs - 47, ys -  4);
-	draw_box(vram, xs, 2, xs - 47, ys -  3, xs -  4, ys -  3);
-	draw_box(vram, xs, 1, xs -  3, ys - 24, xs -  3, ys -  3);
+	draw_box(vram, xs, 10, 0, 0, xs - 1, ys - 16);//主桌面
+	draw_box(vram, xs, 7, 0, ys - 15, xs - 1, ys); //任务栏主体
+	draw_box(vram, xs, 0, 0, ys - 15, xs - 305, ys); //左下角logo(虽然没图片)
+	draw_box(vram, xs, 0, xs - 3, ys - 15, xs, ys); //右下角return_to_desktop
 	return;
 }
 
@@ -67,4 +55,6 @@ void draw_box(unsigned char *vram, int xs, unsigned char color, int x0, int y0, 
 	}
 	return;
 }
+
+void draw_point(unsigned char *vram, )
 
