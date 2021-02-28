@@ -6,6 +6,9 @@ void init_screen(unsigned char *vram, int xs, int ys) {
 	draw_box(vram, xs, 3, 0, ys - 15, xs - 305, ys); //左下角logo(虽然没图片)
 	draw_box(vram, xs, 3, xs - 3, ys - 15, xs, ys); //右下角return_to_desktop
 	put_str(vram, xs, 0, 0, 7, "Hello from MonkeyOS.");
+	// char *info_to_show;
+	// sprintf(info_to_show, "screen.xsize=%d, screen.ysize=%d", xs, ys);
+	// put_str(vram, xs, 0, 15, 3, info_to_show);
 	unsigned char *_mousebuf;
 	init_pointer(_mousebuf, 10);
 	draw_block(vram, _mousebuf, xs, 15, 12, 120, 120, 15);

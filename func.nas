@@ -3,8 +3,9 @@
 [BITS 32]						; 3制作32位模式用的机器语言
 [FILE "func.nas"]			; 文件名
 
-		GLOBAL	_io_hlt, _io_cli, _io_outp8, _io_save_eflags
-		GLOBAL _io_load_eflags
+		GLOBAL	_io_hlt, _io_cli, _io_outp8
+		GLOBAL _io_load_eflags, _io_save_eflags
+		GLOBAL _load_gdtr, _load_idtr
 
 [SECTION .text] ;正式函数
 
@@ -33,3 +34,15 @@ _io_save_eflags:
 	PUSH EAX
 	POPFD
 	RET
+
+_load_gdtr:		; void load_gdtr(int limit, int addr);
+		MOV		AX,[ESP+4]		; limit
+		MOV		[ESP+6],AX
+		LGDT	[ESP+6]
+		RET
+
+_load_idtr:		; void load_idtr(int limit, int addr);
+		MOV		AX,[ESP+4]		; limit
+		MOV		[ESP+6],AX
+		LIDT	[ESP+6]
+		RET
