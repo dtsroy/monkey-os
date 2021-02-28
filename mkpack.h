@@ -22,6 +22,8 @@ void init_screen(unsigned char *vram, int xs, int ys);
 void draw_box(unsigned char *vram, int xs, unsigned char color, int x0, int y0, int x1, int y1);
 void init_pointer(unsigned char *msbuf, int bg);
 void draw_block(unsigned char *vram, unsigned char *buf, int vxs, int xs, int ys, int x0, int y0, int bxs);
+void put_str(unsigned char *vram, int xsize, int x, int y, char color, char *str);
+void put_font(unsigned char *vram, int xsize, int x, int y, char color, unsigned char *font);
 
 //tools.c
 void fin(void);

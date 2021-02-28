@@ -1,7 +1,7 @@
 TOOLPATH = ../z_tools/
 INCPATH  = ../z_tools/haribote/
 
-OBJS_MP = mkpack.obj func.obj graphic.obj tools.obj
+OBJS_MP = mkpack.obj func.obj graphic.obj tools.obj font.obj
 
 DEL = del
 
@@ -41,6 +41,12 @@ mkpack.hrb : mkpack.bim Makefile
 
 MonkeyOS.sys : asmhead.bin mkpack.hrb Makefile
 	copy /B asmhead.bin+mkpack.hrb MonkeyOS.sys
+
+font.bin : font.txt Makefile
+	makefont font.txt font.bin
+
+font.obj : font.bin Makefile
+	bin2obj font.bin font.obj _xfont
 
 %.gas : %.c Makefile
 	$(cc1) -o $*.gas $*.c

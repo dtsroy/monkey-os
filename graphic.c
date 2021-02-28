@@ -5,9 +5,11 @@ void init_screen(unsigned char *vram, int xs, int ys) {
 	draw_box(vram, xs, 7, 0, ys - 15, xs - 1, ys); //任务栏主体
 	draw_box(vram, xs, 3, 0, ys - 15, xs - 305, ys); //左下角logo(虽然没图片)
 	draw_box(vram, xs, 3, xs - 3, ys - 15, xs, ys); //右下角return_to_desktop
+	put_str(vram, xs, 0, 0, 7, "Hello from MonkeyOS.");
 	unsigned char *_mousebuf;
 	init_pointer(_mousebuf, 10);
 	draw_block(vram, _mousebuf, xs, 15, 12, 120, 120, 15);
+	
 	return;
 }
 
@@ -97,5 +99,30 @@ void draw_block(unsigned char *vram, unsigned char *buf,
 		for (int x=0; x<xs; x++) {
 			vram[(x0+x)+(y0+y)*vxs] = buf[x+y*bxs];
 		}
+	}
+}
+
+void put_font(unsigned char *vram, int xsize, int x, int y, char color, unsigned char *font) {
+	int i;
+	char *vaddr, dat;
+	for (i=0; i<16; i++) {
+		vaddr = vram + (y+i) * xsize + x;
+		dat = font[i];
+		if ((dat & 0x80) != 0) {vaddr[0] = color;}
+		if ((dat & 0x40) != 0) {vaddr[1] = color;}
+		if ((dat & 0x20) != 0) {vaddr[2] = color;}
+		if ((dat & 0x10) != 0) {vaddr[3] = color;}
+		if ((dat & 0x08) != 0) {vaddr[4] = color;}
+		if ((dat & 0x04) != 0) {vaddr[5] = color;}
+		if ((dat & 0x02) != 0) {vaddr[6] = color;}
+		if ((dat & 0x01) != 0) {vaddr[7] = color;}
+	}
+}
+
+void put_str(unsigned char *vram, int xsize, int x, int y, char color, char *str) {
+	extern char xfont[4096];
+	for (; *str!=0x00; str++) {
+		put_font(vram, xsize, x, y, color, xfont + *str * 16);
+		x+=8;
 	}
 }
