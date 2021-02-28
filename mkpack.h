@@ -30,6 +30,8 @@ int io_load_eflags(void);
 void io_save_eflags(int eflags);
 void load_gdtr(int limit, int addr);
 void load_idtr(int limit, int addr);
+void ihr21x(void);
+void ihr27x(void);
 
 //graghic.c
 void init_palette(void);
@@ -71,5 +73,8 @@ void set_gatedesc(struct GATE_DESCRIPTOR *gd, int offset, int selector, int ar);
 #define PIC1_ICW2		0x00a1
 #define PIC1_ICW3		0x00a1
 #define PIC1_ICW4		0x00a1
+void init_pic(void);
+void ihr21(int *esp);
+void ihr27(int *esp);
 
 #endif

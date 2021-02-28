@@ -3,14 +3,14 @@
 void init_gdtidt(void)
 {
 	struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
-	struct GATE_DESCRIPTOR    *idt = (struct GATE_DESCRIPTOR    *) ADR_IDT;
+	struct GATE_DESCRIPTOR *idt = (struct GATE_DESCRIPTOR*) ADR_IDT;
 	int i;
 
 	/* GDT初始化 */
 	for (i = 0; i <= LIMIT_GDT / 8; i++) {
 		set_segmdesc(gdt + i, 0, 0, 0);
 	}
-	set_segmdesc(gdt + 1, 0xffffffff,   0x00000000, AR_DATA32_RW);
+	set_segmdesc(gdt + 1, 0xffffffff, 0x00000000, AR_DATA32_RW);
 	set_segmdesc(gdt + 2, LIMIT_BOTPAK, ADR_BOTPAK, AR_CODE32_ER); //主程序段,512B
 	load_gdtr(LIMIT_GDT, ADR_GDT);
 
@@ -21,9 +21,9 @@ void init_gdtidt(void)
 	load_idtr(LIMIT_IDT, ADR_IDT);
 
 	/* IDT设置*/
-	// set_gatedesc(idt + 0x21, (int) asm_inthandler21, 2 * 8, AR_INTGATE32);
+	set_gatedesc(idt + 0x21, (int) ihr21x, 2 * 8, AR_INTGATE32);
 	// set_gatedesc(idt + 0x27, (int) asm_inthandler27, 2 * 8, AR_INTGATE32);
-	// set_gatedesc(idt + 0x2c, (int) asm_inthandler2c, 2 * 8, AR_INTGATE32);
+	set_gatedesc(idt + 0x2c, (int) ihr27x, 2 * 8, AR_INTGATE32);
 
 	return;
 }
