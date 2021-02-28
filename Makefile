@@ -7,7 +7,7 @@ DEL = del
 
 make     = $(TOOLPATH)make.exe -r
 nask     = $(TOOLPATH)nask.exe
-cc1      = $(TOOLPATH)cc1.exe -I$(INCPATH) -Os -Wall -quiet
+cc1      = $(TOOLPATH)cc1.exe -I$(INCPATH) -Os -Wall -quiet -std=c99
 gas2nask = $(TOOLPATH)gas2nask.exe -a
 obj2bim  = $(TOOLPATH)obj2bim.exe
 bim2hrb  = $(TOOLPATH)bim2hrb.exe

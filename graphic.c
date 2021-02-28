@@ -3,8 +3,11 @@
 void init_screen(unsigned char *vram, int xs, int ys) {
 	draw_box(vram, xs, 10, 0, 0, xs - 1, ys - 16);//主桌面
 	draw_box(vram, xs, 7, 0, ys - 15, xs - 1, ys); //任务栏主体
-	draw_box(vram, xs, 0, 0, ys - 15, xs - 305, ys); //左下角logo(虽然没图片)
-	draw_box(vram, xs, 0, xs - 3, ys - 15, xs, ys); //右下角return_to_desktop
+	draw_box(vram, xs, 3, 0, ys - 15, xs - 305, ys); //左下角logo(虽然没图片)
+	draw_box(vram, xs, 3, xs - 3, ys - 15, xs, ys); //右下角return_to_desktop
+	unsigned char *_mousebuf;
+	init_pointer(_mousebuf, 10);
+	draw_block(vram, _mousebuf, xs, 15, 12, 120, 120, 15);
 	return;
 }
 
@@ -56,5 +59,43 @@ void draw_box(unsigned char *vram, int xs, unsigned char color, int x0, int y0, 
 	return;
 }
 
-void draw_point(unsigned char *vram, )
+void init_pointer(unsigned char *msbuf, int bg) {
+	static char pointer[12][15] = {
+		"*.................",
+		"*0*...............",
+		"*000*.............",
+		"*00000*...........",
+		"*0000000*.........",
+		"*000000000*.......",
+		"*00000000000*.....",
+		"*000*0000*****....",
+		"*00*.*000*........",
+		"*0*...*000*.......",
+		"**.....*000*......",
+		"........*****....."
+	};
+	int x, y;
+	for (y=0; y<12; y++) {
+		for (x=0; x<15; x++) {
+			char now = pointer[y][x];
+			if (now == '*') {
+				msbuf[x+y*15] = 0;
+			}
+			if (now == '0') {
+				msbuf[x+y*15] = 7;
+			}
+			if (now == '.') {
+				msbuf[x+y*15] = bg;
+			}
+		}
+	}
+}
 
+void draw_block(unsigned char *vram, unsigned char *buf,
+				int vxs, int xs, int ys, int x0, int y0, int bxs) {
+	for (int y=0; y<ys; y++) {
+		for (int x=0; x<xs; x++) {
+			vram[(x0+x)+(y0+y)*vxs] = buf[x+y*bxs];
+		}
+	}
+}
