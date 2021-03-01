@@ -3,7 +3,7 @@
 [BITS 32]						; 3制作32位模式用的机器语言
 [FILE "func.nas"]			; 文件名
 
-		GLOBAL	_io_hlt, _io_cli, _io_outp8
+		GLOBAL	_io_hlt, _io_cli, _io_sti, _io_outp8
 		GLOBAL _io_load_eflags, _io_save_eflags
 		GLOBAL _load_gdtr, _load_idtr
 		GLOBAL _ihr21x, _ihr27x
@@ -18,6 +18,10 @@ _io_hlt: ; void io_hlt(void);
 
 _io_cli: ; void io_cli(void)
 	CLI
+	RET
+
+_io_sti:
+	STI
 	RET
 
 _io_outp8: ; void io_outp8(int port, int data);
@@ -75,7 +79,7 @@ _ihr27x:
 		MOV		AX,SS
 		MOV		DS,AX
 		MOV		ES,AX
-		CALL	_inthandler27
+		CALL	_ihr27
 		POP		EAX
 		POPAD
 		POP		DS

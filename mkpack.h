@@ -32,6 +32,7 @@ void load_gdtr(int limit, int addr);
 void load_idtr(int limit, int addr);
 void ihr21x(void);
 void ihr27x(void);
+void io_sti(void);
 
 //graghic.c
 void init_palette(void);

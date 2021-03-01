@@ -20,9 +20,9 @@ void init_pic(void) {
 
 void ihr21(int *esp) {
 	struct BootInfo *bt = (struct BootInfo*) 0x0ff0;
-	put_str(bt->vram, bt->xs, 0, 0, 7, "Interuption at IQR21:keyboard.");
+	put_str(bt->vram, bt->xs, 0, 16, 7, "Interuption at IQR21:keyboard.");
 	// draw_box(bt->vram, bt->xs, 10, 0, 0, 30*8-1, 15);
-	put_str(bt->vram, bt->xs, 0, 0, 7, "Interuption at IQR21:keyboard.");
+	// put_str(bt->vram, bt->xs, 0, 0, 7, "Interuption at IQR21:keyboard.");
 	fin();
 }
 
