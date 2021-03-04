@@ -21,9 +21,8 @@ void init_gdtidt(void)
 	load_idtr(LIMIT_IDT, ADR_IDT);
 
 	/* IDT设置*/
-	set_gatedesc(idt + 0x21, (int) ihr21x, 2 * 8, AR_INTGATE32);
-	// set_gatedesc(idt + 0x27, (int) asm_inthandler27, 2 * 8, AR_INTGATE32);
-	set_gatedesc(idt + 0x2c, (int) ihr27x, 2 * 8, AR_INTGATE32);
+	set_gatedesc(idt + 0x21, (int) ihr21x, 2 * 8, AR_INTGATE32);//键盘中断
+	set_gatedesc(idt + 0x27, (int) ihr27x, 2 * 8, AR_INTGATE32);//...
 
 	return;
 }
