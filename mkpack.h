@@ -22,6 +22,11 @@ struct GATE_DESCRIPTOR {
 	short offset_high;
 };
 
+struct fifo {
+	unsigned char *addr; //缓冲区地址
+	int wp, rp, sz, free, flag; //写入指针,读取指针,大小,空余,是否溢出(0, -1)
+};
+
 //func.nas
 void io_hlt(void);
 void io_outp8(int port, int data);
@@ -32,7 +37,10 @@ void load_gdtr(int limit, int addr);
 void load_idtr(int limit, int addr);
 void ihr21x(void);
 void ihr27x(void);
+void ihr2cx(void);
 void io_sti(void);
+void io_shlt(void);
+int io_inp8(int port);
 
 //graghic.c
 void init_palette(void);
@@ -62,20 +70,40 @@ void set_segmdesc(struct SEGMENT_DESCRIPTOR *sd, unsigned int limit, int base, i
 void set_gatedesc(struct GATE_DESCRIPTOR *gd, int offset, int selector, int ar);
 
 //int.c
-#define PIC0_ICW1		0x0020
-#define PIC0_OCW2		0x0020
-#define PIC0_IMR		0x0021
-#define PIC0_ICW2		0x0021
-#define PIC0_ICW3		0x0021
-#define PIC0_ICW4		0x0021
-#define PIC1_ICW1		0x00a0
-#define PIC1_OCW2		0x00a0
-#define PIC1_IMR		0x00a1
-#define PIC1_ICW2		0x00a1
-#define PIC1_ICW3		0x00a1
-#define PIC1_ICW4		0x00a1
+#define PIC0_ICW1 0x0020
+#define PIC0_OCW 0x0020
+#define PIC0_IMR 0x0021
+#define PIC0_ICW2 0x0021
+#define PIC0_ICW3 0x0021
+#define PIC0_ICW4 0x0021
+#define PIC1_ICW1 0x00a0
+#define PIC1_OCW 0x00a0
+#define PIC1_IMR 0x00a1
+#define PIC1_ICW2 0x00a1
+#define PIC1_ICW3 0x00a1
+#define PIC1_ICW4 0x00a1
 void init_pic(void);
 void ihr21(int *esp);
 void ihr27(int *esp);
+void ihr2c(int *esp);
+
+//fifo.c
+void init_fifo(struct fifo *xmain, int size, unsigned char *buf);
+int fifo_put(struct fifo *xmain, unsigned char dat);
+int fifo_get(struct fifo *xmain);
+int fifo_sts(struct fifo *xmain);
+
+//keyboard_and_mouse.c
+#define P_KEYDAT 0x0060
+#define P_KEYSTA 0x0064
+#define P_KEYCMD 0x0064
+#define KEYCMD_WRITE_MODE 0x60
+#define KBC_MODE 0x47
+#define KEYCMD_SENDTO_MOUSE 0xd4
+#define MOUSECMD_ENABLE 0xf4
+void init_k_m_if(int ks, int ms, char *kb, char *mb);
+void wait_kr(void);
+void init_keyboard(void);
+void init_mouse(void);
 
 #endif

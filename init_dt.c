@@ -23,6 +23,8 @@ void init_gdtidt(void)
 	/* IDT设置*/
 	set_gatedesc(idt + 0x21, (int) ihr21x, 2 * 8, AR_INTGATE32);//键盘中断
 	set_gatedesc(idt + 0x27, (int) ihr27x, 2 * 8, AR_INTGATE32);//...
+	set_gatedesc(idt + 0x2c, (int) ihr2cx, 2 * 8, AR_INTGATE32);//鼠标中断
+
 
 	return;
 }

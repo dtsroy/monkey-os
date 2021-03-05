@@ -6,9 +6,10 @@
 		GLOBAL	_io_hlt, _io_cli, _io_sti, _io_outp8
 		GLOBAL _io_load_eflags, _io_save_eflags
 		GLOBAL _load_gdtr, _load_idtr
-		GLOBAL _ihr21x, _ihr27x
+		GLOBAL _ihr21x, _ihr27x, _ihr2cx
+		GLOBAL _io_inp8, _io_shlt
 
-		EXTERN _ihr21, _ihr27
+		EXTERN _ihr21, _ihr27, _ihr2c
 
 [SECTION .text] ;正式函数
 
@@ -86,3 +87,29 @@ _ihr27x:
 		POP		ES
 		IRETD
 
+_ihr2cx:
+		PUSH	ES
+		PUSH	DS
+		PUSHAD
+		MOV		EAX,ESP
+		PUSH	EAX
+		MOV		AX,SS
+		MOV		DS,AX
+		MOV		ES,AX
+		CALL	_ihr2c
+		POP		EAX
+		POPAD
+		POP		DS
+		POP		ES
+		IRETD
+
+_io_inp8:	; int io_inp8(int port);
+		MOV		EDX,[ESP+4]		; port
+		MOV		EAX,0
+		IN		AL,DX
+		RET
+
+_io_shlt:
+	STI
+	HLT
+	RET
