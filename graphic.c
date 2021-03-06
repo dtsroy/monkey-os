@@ -9,9 +9,7 @@ void init_screen(unsigned char *vram, int xs, int ys) {
 	// char *info_to_show;
 	// sprintf(info_to_show, "screen.xsize=%d, screen.ysize=%d", xs, ys);
 	// put_str(vram, xs, 0, 15, 3, info_to_show);
-	unsigned char *_mousebuf;
-	init_pointer(_mousebuf, 10);
-	draw_block(vram, _mousebuf, xs, 15, 12, 120, 120, 15);
+
 	
 	return;
 }
@@ -65,32 +63,32 @@ void draw_box(unsigned char *vram, int xs, unsigned char color, int x0, int y0, 
 }
 
 void init_pointer(unsigned char *msbuf, int bg) {
-	static char pointer[12][15] = {
-		"*.................",
-		"*0*...............",
-		"*000*.............",
-		"*00000*...........",
-		"*0000000*.........",
-		"*000000000*.......",
-		"*00000000000*.....",
-		"*000*0000*****....",
-		"*00*.*000*........",
-		"*0*...*000*.......",
-		"**.....*000*......",
-		"........*****....."
+	static char pointer[12][12] = {
+		"*..............",
+		"*0*............",
+		"*000*..........",
+		"*00000*........",
+		"*0000000*......",
+		"*000000000*....",
+		"*00000000000*..",
+		"*000*0000*****.",
+		"*00*.*000*.....",
+		"*0*...*000*....",
+		"**.....*000*...",
+		"........*****.."
 	};
 	int x, y;
 	for (y=0; y<12; y++) {
-		for (x=0; x<15; x++) {
+		for (x=0; x<12; x++) {
 			char now = pointer[y][x];
 			if (now == '*') {
-				msbuf[x+y*15] = 0;
+				msbuf[x+y*12] = 0;
 			}
 			if (now == '0') {
-				msbuf[x+y*15] = 7;
+				msbuf[x+y*12] = 7;
 			}
 			if (now == '.') {
-				msbuf[x+y*15] = bg;
+				msbuf[x+y*12] = bg;
 			}
 		}
 	}

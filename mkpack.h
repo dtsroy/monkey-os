@@ -27,6 +27,11 @@ struct fifo {
 	int wp, rp, sz, free, flag; //写入指针,读取指针,大小,空余,是否溢出(0, -1)
 };
 
+struct mdec {
+	unsigned char buf[3], st;
+	int x, y, btn;
+};
+
 //func.nas
 void io_hlt(void);
 void io_outp8(int port, int data);
@@ -105,5 +110,6 @@ void init_k_m_if(int ks, int ms, char *kb, char *mb);
 void wait_kr(void);
 void init_keyboard(void);
 void init_mouse(void);
+int mdecode(struct mdec *xmain, unsigned char *dat);
 
 #endif
