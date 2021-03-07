@@ -46,6 +46,9 @@ void ihr2cx(void);
 void io_sti(void);
 void io_shlt(void);
 int io_inp8(int port);
+int load_cr0(void);
+void save_cr0(int cr0);
+int getmemx(int start, int end);
 
 //graghic.c
 void init_palette(void);
@@ -59,6 +62,7 @@ void put_font(unsigned char *vram, int xsize, int x, int y, char color, unsigned
 
 //tools.c
 void fin(void);
+unsigned char test486(void);
 
 //init_dt.c
 #define ADR_IDT			0x0026f800
@@ -111,5 +115,9 @@ void wait_kr(void);
 void init_keyboard(void);
 void init_mouse(void);
 int mdecode(struct mdec *xmain, unsigned char *dat);
+
+//memory.c
+#define EFLAGS_AC_BIT 0x00040000
+#define CR0_CACHE_DISABLE 0x60000000
 
 #endif

@@ -8,6 +8,8 @@
 		GLOBAL _load_gdtr, _load_idtr
 		GLOBAL _ihr21x, _ihr27x, _ihr2cx
 		GLOBAL _io_inp8, _io_shlt
+		GLOBAL _load_cr0, _save_cr0
+		GLOBAL _getmemx
 
 		EXTERN _ihr21, _ihr27, _ihr2c
 
@@ -112,4 +114,46 @@ _io_inp8:	; int io_inp8(int port);
 _io_shlt:
 	STI
 	HLT
+	RET
+
+_load_cr0:
+	MOV EAX,CR0
+	RET
+
+_save_cr0:
+	MOV EAX,[ESP+4]
+	MOV CR0,EAX
+	RET
+
+_getmemx:
+	PUSH EDI
+	PUSH ESI
+	PUSH EBX ;压栈
+	MOV ESI,0x11221122
+	MOV EDI,0xeeddeedd
+	MOV EAX,[ESP+16]
+gmlp:
+	MOV EBX,EAX
+	ADD EBX,0x7ffc
+	MOV EDX,[EBX]
+	MOV [EBX],ESI
+	XOR DWORD [EBX],0xffffffff
+	CMP EDI,[EBX]
+	JNE gmfin
+	XOR DWORD [EBX],0xffffffff
+	CMP ESI,[EBX]
+	JNE gmfin
+	MOV [EBX],EDX
+	ADD EAX,0x8000
+	CMP EAX,[ESP+20]
+	JBE gmlp
+	POP EBX
+	POP ESI
+	POP EDI
+	RET
+gmfin:
+	MOV [EBX],EDX
+	POP EBX
+	POP ESI
+	POP EDI
 	RET

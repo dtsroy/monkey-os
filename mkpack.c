@@ -28,6 +28,8 @@ void MonkeyMain(void) {
 	init_pointer(_mscur, 10);
 	draw_block(btif->vram, _mscur, btif->xs, 12, 12, mx, my, 12);
 
+	sprintf(s, "memory %dMB", getmem(0x00400000, 0xbfffffff) / (1024*1024));
+	put_str(btif->vram, btif->xs, 0, 32, 3, s);
 	for (;;) {
 		io_cli();
 		int ks = fifo_sts(&k_if);
