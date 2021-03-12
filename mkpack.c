@@ -5,7 +5,7 @@ extern struct fifo k_if, m_if;
 void MonkeyMain(void) {
 	struct BootInfo *btif = (struct BootInfo*) 0x0ff0;
 	char *s, keybuf[32], mousebuf[128], _mscur[12*12];
-	int i, mx, my;
+	int i, mx, my, memtotal;
 	struct mdec mouse_decoder;
 	mx = (btif->xs - 12) / 2;
 	my = (btif->ys - 12 - 14) / 2;
@@ -22,13 +22,15 @@ void MonkeyMain(void) {
 	init_mouse();
 	mouse_decoder.st = 0;
 
+	memtotal = getmem(0x400000, 0xffffffff);
+
 	init_palette();
 	init_screen(btif->vram, btif->xs, btif->ys);
 
 	init_pointer(_mscur, 10);
 	draw_block(btif->vram, _mscur, btif->xs, 12, 12, mx, my, 12);
 
-	sprintf(s, "memory %dMB", getmem(0x00400000, 0xbfffffff) / (1024*1024));
+	sprintf(s, "memory %dMB", memtotal / (1024*1024));
 	put_str(btif->vram, btif->xs, 0, 32, 3, s);
 	for (;;) {
 		io_cli();

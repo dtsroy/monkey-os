@@ -129,8 +129,8 @@ _getmemx:
 	PUSH EDI
 	PUSH ESI
 	PUSH EBX ;压栈
-	MOV ESI,0x11221122
-	MOV EDI,0xeeddeedd
+	MOV ESI,0x11221122 
+	MOV EDI,0xeeddeedd ;0x11221122 XOR 0xffffffff
 	MOV EAX,[ESP+16]
 gmlp:
 	MOV EBX,EAX
