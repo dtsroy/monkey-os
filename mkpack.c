@@ -22,7 +22,12 @@ void MonkeyMain(void) {
 	init_mouse();
 	mouse_decoder.st = 0;
 
+	struct mctrler *mcr = (struct mctrler *)MCTRLER_ADDR;
+
 	memtotal = getmem(0x400000, 0xffffffff);
+	init_mctrler(mcr);
+	mctrler_free(mcr, 0x1000, 0x9e000);
+	mctrler_free(mcr, 0x400000, memtotal - 0x400000);
 
 	init_palette();
 	init_screen(btif->vram, btif->xs, btif->ys);
@@ -30,7 +35,7 @@ void MonkeyMain(void) {
 	init_pointer(_mscur, 10);
 	draw_block(btif->vram, _mscur, btif->xs, 12, 12, mx, my, 12);
 
-	sprintf(s, "memory %dMB", memtotal / (1024*1024));
+	sprintf(s, "memory %dMB, free:%dkb", memtotal / (1024*1024), mctrler_total(mcr) / 1024);
 	put_str(btif->vram, btif->xs, 0, 32, 3, s);
 	for (;;) {
 		io_cli();
