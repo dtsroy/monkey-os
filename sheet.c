@@ -4,7 +4,7 @@ struct sctrler *init_sctrler(struct mctrler *xmain, unsigned int vram, int xs, i
 	struct sctrler *ret;
 	int i;
 	ret = (struct sctrler *) mctrler_allocx(xmain, sizeof(struct sctrler));
-	if (ret == 0) {return 0;}
+	if (ret == 0) {goto err;}
 	ret->vram = vram;
 	ret->xs = xs;
 	ret->ys = ys;
@@ -12,6 +12,7 @@ struct sctrler *init_sctrler(struct mctrler *xmain, unsigned int vram, int xs, i
 	for (i=0; i<MAX_SHEETS; i++) {
 		ret->shts0[i].flag = 0;
 	}
+err:
 	return ret;
 }
 
@@ -48,7 +49,7 @@ void sctrler_setheight(struct sctrler *xmain, struct sheet *sht, int height) {
 	//设定
 	sht->height = height;
 	//针对指针排列
-	if (height > old) {
+	if (height < old) {
 		//比以前低
 		if (height >= 0) {
 			//得到显示机会
