@@ -1,4 +1,4 @@
-TOOLPATH = ../z_tools/
+TOOLPATH = ..\\z_tools\\
 INCPATH  = ../z_tools/haribote/
 
 OBJS_MP = mkpack.obj func.obj graphic.obj \
@@ -6,7 +6,8 @@ OBJS_MP = mkpack.obj func.obj graphic.obj \
 			fifo.obj keyboard_and_mouse.obj memory.obj \
 			sheet.obj
 
-DEL = del
+DEL = .\\del.bat
+COPY = .\\copy.bat
 
 make     = $(TOOLPATH)make.exe -r
 nask     = $(TOOLPATH)nask.exe
@@ -43,7 +44,7 @@ mkpack.hrb : mkpack.bim Makefile
 	$(bim2hrb) mkpack.bim mkpack.hrb 0
 
 MonkeyOS.sys : asmhead.bin mkpack.hrb Makefile
-	./cp /B asmhead.bin+mkpack.hrb MonkeyOS.sys
+	$(COPY) /B asmhead.bin+mkpack.hrb MonkeyOS.sys
 
 font.bin : font.txt Makefile
 	makefont font.txt font.bin
@@ -68,7 +69,7 @@ img :
 
 run :
 	$(make) img
-	./cp MonkeyOS.img ..\z_tools\qemu\fdimage0.bin
+	$(COPY) MonkeyOS.img ..\z_tools\qemu\fdimage0.bin
 	$(make) -C ../z_tools/qemu
 
 install :
@@ -76,6 +77,10 @@ install :
 	../z_tools/imgtol.com w a: MonkeyOS.img
 
 clean :
+	-$(DEL) *.bin
+	-$(DEL) *.lst
+	-$(DEL) *.gas
+	-$(DEL) *.obj
 	-$(DEL) *.bin
 	-$(DEL) *.lst
 	-$(DEL) *.gas

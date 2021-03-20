@@ -38,17 +38,22 @@ void MonkeyMain(void) {
 	sht_back = sctrler_alloc(scr);
 	sht_ms = sctrler_alloc(scr);
 	_backbuf = (unsigned char *) mctrler_allocx(mcr, btif->xs * btif->ys);
+	
 	sheet_setbuf(sht_back, _backbuf, btif->xs, btif->ys, -1);
 	sheet_setbuf(sht_ms, _mscur, 12, 12, 99);
+
 	init_screen(_backbuf, btif->xs, btif->ys);
 	init_pointer(_mscur, 99);
+
+	sctrler_slide(scr, sht_back, 0, 0);
+	
 	sctrler_slide(scr, sht_ms, mx, my);
 	sctrler_setheight(scr, sht_back, 0);
 	sctrler_setheight(scr, sht_ms, 1);
 
 	sprintf(s, "memory %dMB, free:%dkb", memtotal / (1024*1024), mctrler_total(mcr) / 1024);
 	put_str(_backbuf, btif->xs, 0, 32, 3, s);
-	sctrler_refresh(scr, sht_back, 0, 0, btif->xs, 48);
+	sctrler_refresh(scr, sht_back, 0, 0, btif->xs, btif->ys);
 	for (;;) {
 		io_cli();
 		int ks = fifo_sts(&k_if);
@@ -99,10 +104,10 @@ void MonkeyMain(void) {
 					if (my > btif->ys - 12) {
 						my = btif->ys - 12;
 					}
-					sprintf(s, "(%d, %d)", mx, my);
+					sprintf(s, "cccc(%d, %d)", mx, my);
 					draw_box(_backbuf, btif->xs, 10, 0, 0, 320, 16);
 					put_str(_backbuf, btif->xs, 3, 0, 0, s);
-					sctrler_refresh(scr, sht_ms, 0, 0, 80, 16);
+					sctrler_refresh(scr, sht_ms, 0, 16, 80, 16);
 					sctrler_slide(scr, sht_ms, mx, my);
 				}
 			}

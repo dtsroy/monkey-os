@@ -162,6 +162,7 @@ void sctrler_refresh(struct sctrler *xmain, struct sheet *sht, int bx0, int by0,
 void sctrler_refreshx(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1);
 void sctrler_slide(struct sctrler *xmain, struct sheet *sht, int vx0, int vy0);
 void sctrler_setheight(struct sctrler *xmain, struct sheet *sht, int height);
+void sctrler_free(struct sctrler *xmain, struct sheet *sht);
 
 
 #endif

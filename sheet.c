@@ -16,14 +16,14 @@ struct sctrler *init_sctrler(struct mctrler *xmain, unsigned int vram, int xs, i
 }
 
 struct sheet *sctrler_alloc(struct sctrler *xmain) {
-	struct sheet ret;
+	struct sheet *ret;
 	int i;
 	for (i=0; i<MAX_SHEETS; i++) {
 		if (xmain->shts0[i].flag == 0) {
-			ret = xmain->shts0[i];
-			ret.flag = 1;
-			ret.height = -1;
-			return &ret;
+			ret = &xmain->shts0[i];
+			ret->flag = 1;
+			ret->height = -1;
+			return ret;
 		}
 	}
 	return 0;
@@ -139,4 +139,11 @@ void sctrler_slide(struct sctrler *xmain, struct sheet *sht, int vx0, int vy0) {
 		sctrler_refreshx(xmain, ox, oy, ox+sht->bxs, oy+sht->bys);
 		sctrler_refreshx(xmain, vx0, vy0, vx0 + sht->bxs, vy0 + sht->bys);
 	}
+}
+
+void sctrler_free(struct sctrler *xmain, struct sheet *sht) {
+	if (sht->height >= 0) {
+		sctrler_setheight(xmain, sht, -1);
+	}
+	sht->flag = 0;
 }
