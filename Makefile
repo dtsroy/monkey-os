@@ -3,7 +3,8 @@ INCPATH  = ../z_tools/haribote/
 
 OBJS_MP = mkpack.obj func.obj graphic.obj \
 			tools.obj font.obj init_dt.obj int.obj \
-			fifo.obj keyboard_and_mouse.obj memory.obj
+			fifo.obj keyboard_and_mouse.obj memory.obj \
+			sheet.obj
 
 DEL = del
 
@@ -42,7 +43,7 @@ mkpack.hrb : mkpack.bim Makefile
 	$(bim2hrb) mkpack.bim mkpack.hrb 0
 
 MonkeyOS.sys : asmhead.bin mkpack.hrb Makefile
-	copy /B asmhead.bin+mkpack.hrb MonkeyOS.sys
+	./cp /B asmhead.bin+mkpack.hrb MonkeyOS.sys
 
 font.bin : font.txt Makefile
 	makefont font.txt font.bin
@@ -67,7 +68,7 @@ img :
 
 run :
 	$(make) img
-	copy MonkeyOS.img ..\z_tools\qemu\fdimage0.bin
+	./cp MonkeyOS.img ..\z_tools\qemu\fdimage0.bin
 	$(make) -C ../z_tools/qemu
 
 install :

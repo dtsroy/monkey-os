@@ -44,6 +44,20 @@ struct mctrler {
 	struct freeif free[MCTRLER_MAX_FREES];
 };
 
+struct sheet {
+	unsigned char *buf;
+	int bxs, bys, vx0, vy0, cliv, height, flag;
+};
+
+#define MAX_SHEETS 256
+
+struct sctrler {
+	unsigned char *vram;
+	int xs, ys, top;
+	struct sheet *shts[MAX_SHEETS];
+	struct sheet shts0[MAX_SHEETS];
+};
+
 //func.nas
 void io_hlt(void);
 void io_outp8(int port, int data);
@@ -137,5 +151,17 @@ void init_mctrler(struct mctrler *xmain);
 unsigned int mctrler_total(struct mctrler *xmain);
 unsigned int mctrler_alloc(struct mctrler *xmain, unsigned int size);
 int mctrler_free(struct mctrler *xmain, unsigned int addr, unsigned int size);
+unsigned int mctrler_allocx(struct mctrler *xmain, unsigned int size);
+int mctrler_freex(struct mctrler *xmain, unsigned int addr, unsigned int size);
+
+//sheet.c
+struct sctrler *init_sctrler(struct mctrler *xmain, unsigned int vram, int xs, int ys);
+struct sheet *sctrler_alloc(struct sctrler *xmain);
+void sheet_setbuf(struct sheet *xmain, unsigned char *buf, int xs, int ys, int cliv);
+void sctrler_refresh(struct sctrler *xmain, struct sheet *sht, int bx0, int by0, int bx1, int by1);
+void sctrler_refreshx(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1);
+void sctrler_slide(struct sctrler *xmain, struct sheet *sht, int vx0, int vy0);
+void sctrler_setheight(struct sctrler *xmain, struct sheet *sht, int height);
+
 
 #endif

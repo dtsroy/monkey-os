@@ -112,3 +112,17 @@ int mctrler_free(struct mctrler *xmain, unsigned int addr, unsigned int size) {
 	xmain->lostsize += size;
 	return -1;
 }
+
+unsigned int mctrler_allocx(struct mctrler *xmain, unsigned int size) {
+	unsigned int ret;
+	size = (size + 0xfff) & 0xfffff000;
+	ret = mctrler_alloc(xmain, size);
+	return ret;
+}
+
+int mctrler_freex(struct mctrler *xmain, unsigned int addr, unsigned int size) {
+	int ret;
+	size = (size + 0xfff) & 0xfffff000;
+	ret = mctrler_free(xmain, addr, size);
+	return ret;
+}
