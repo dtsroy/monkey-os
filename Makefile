@@ -24,7 +24,7 @@ default :
 # 镜像文件生成
 
 ipl.bin : ipl.nas Makefile
-	$(nask) ipl.nas ipl.bin
+	$(nask) ipl.nas ipl.bin ipl.lst
 
 asmhead.bin : asmhead.nas Makefile
 	$(nask) asmhead.nas asmhead.bin

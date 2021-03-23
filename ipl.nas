@@ -95,7 +95,7 @@ exit:
 	JMP exit
 
 msg:
-	DB 0x0a,0x0a
+	DB 0x0a, 0x0a, 0x0a
 	DB "Monkey OS can't be loaded after trying 5 times.Try it again."
 	DB 0x0a
 	DB 0

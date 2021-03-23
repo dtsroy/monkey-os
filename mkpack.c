@@ -5,7 +5,8 @@ extern struct fifo k_if, m_if;
 void MonkeyMain(void) {
 	struct BootInfo *btif = (struct BootInfo*) 0x0ff0;
 	char *s, keybuf[32], mousebuf[128], _mscur[12*12], *_backbuf;
-	int i, mx, my, memtotal;
+	int i, mx, my;
+	unsigned int memtotal;
 	struct mdec mouse_decoder;
 	struct sctrler *scr;
 	struct sheet *sht_ms, *sht_back;
@@ -26,7 +27,7 @@ void MonkeyMain(void) {
 
 	struct mctrler *mcr = (struct mctrler *)MCTRLER_ADDR;
 
-	memtotal = getmem(0x400000, 0xffffffff);
+	memtotal = getmem(0x400000, 0xfffffffffffffffffffff);//0xffffffff
 	init_mctrler(mcr);
 	mctrler_free(mcr, 0x1000, 0x9e000);
 	mctrler_free(mcr, 0x400000, memtotal - 0x400000);
@@ -83,11 +84,11 @@ void MonkeyMain(void) {
 					if ((mouse_decoder.btn & 0x04) != 0) {
 						s[8] = 'C';
 					}
-					draw_box(_backbuf, btif->xs, 10, 0, 16, 320, 31);
-					put_str(_backbuf, btif->xs, 33, 16, 3, s);
+					draw_box(_backbuf, btif->xs, 10, 33, 16, 320, 31);
+					put_str(_backbuf, btif->xs, 32, 16, 3, s);
 					sctrler_refresh(scr, sht_back, 32, 16, 320, 32);
 					//隐藏鼠标
-					//draw_box(btif->vram, btif->xs, 10, mx, my, mx+12, my+12);
+					//draw_box(_backbuf, btif->xs, 10, mx, my, mx+12, my+12);
 					//重新计算mx,my
 					mx += mouse_decoder.x;
 					my += mouse_decoder.y;
@@ -104,9 +105,10 @@ void MonkeyMain(void) {
 					if (my > btif->ys - 12) {
 						my = btif->ys - 12;
 					}
-					sprintf(s, "cccc(%d, %d)", mx, my);
+					sprintf(s, "(%d, %d)", mx, my);
 					draw_box(_backbuf, btif->xs, 10, 0, 0, 320, 16);
 					put_str(_backbuf, btif->xs, 3, 0, 0, s);
+					sctrler_refresh(scr, sht_back, 0, 0, 320, 16);
 					sctrler_refresh(scr, sht_ms, 0, 16, 80, 16);
 					sctrler_slide(scr, sht_ms, mx, my);
 				}
