@@ -104,6 +104,12 @@ void sctrler_refreshx(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1)
 	int h, bx, by, vx, vy, bx0, by0, bx1, by1;
 	unsigned char *buf, c, *vram=xmain->vram;
 	struct sheet *sht;
+
+	if (vx0 < 0) {vx0 = 0;}
+	if (vy0 < 0) {vy0 = 0;}
+	if (vx1 > xmain->xs) {vx1 = xmain->xs;}
+	if (vy1 > xmain->ys) {vy1 = xmain->ys;}
+
 	for (h=0; h<=xmain->top; h++) {
 		sht = xmain->shts[h];
 		buf = sht->buf;

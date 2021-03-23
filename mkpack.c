@@ -99,11 +99,11 @@ void MonkeyMain(void) {
 					if (my < 0) {
 						my = 0;
 					}
-					if (mx > btif->xs - 12) {
-						mx = btif->xs - 12;
+					if (mx > btif->xs - 1) {
+						mx = btif->xs - 1;
 					}
-					if (my > btif->ys - 12) {
-						my = btif->ys - 12;
+					if (my > btif->ys - 1) {
+						my = btif->ys - 1;
 					}
 					sprintf(s, "(%d, %d)", mx, my);
 					draw_box(_backbuf, btif->xs, 10, 0, 0, 320, 16);
