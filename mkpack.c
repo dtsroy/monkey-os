@@ -5,11 +5,13 @@ extern struct fifo k_if, m_if;
 void MonkeyMain(void) {
 	struct BootInfo *btif = (struct BootInfo*) 0x0ff0;
 	char *s, keybuf[32], mousebuf[128], _mscur[12*12], *_backbuf;
+	char *testwinbuf;
 	int i, mx, my;
 	unsigned int memtotal;
 	struct mdec mouse_decoder;
 	struct sctrler *scr;
 	struct sheet *sht_ms, *sht_back;
+	struct sheet *sht_tw;
 	mx = (btif->xs - 12) / 2;
 	my = (btif->ys - 12 - 14) / 2;
 
@@ -34,7 +36,7 @@ void MonkeyMain(void) {
 
 	init_palette();
 	
-
+	// char *xx = mctrler_allocx(mcr, 0x1000);
 	scr = init_sctrler(mcr, btif->vram, btif->xs, btif->ys);
 	sht_back = sctrler_alloc(scr);
 	sht_ms = sctrler_alloc(scr);
@@ -50,7 +52,15 @@ void MonkeyMain(void) {
 	
 	sctrler_slide(scr, sht_ms, mx, my);
 	sctrler_setheight(scr, sht_back, 0);
-	sctrler_setheight(scr, sht_ms, 1);
+	sctrler_setheight(scr, sht_ms, 2);
+
+	testwinbuf = mctrler_allocx(mcr, 120*120);
+	sht_tw = sctrler_alloc(scr);
+	struct mwindow *tw = init_mwindow("test!", testwinbuf, 120, 120);
+	sheet_setbuf(sht_tw, testwinbuf, 120, 120, -1);
+	mwindow_draw(tw);
+	sctrler_setheight(scr, sht_tw, 1);
+	sctrler_slide(scr, sht_tw, 12, 9);
 
 	sprintf(s, "memory %dMB, free:%dkb", memtotal / (1024*1024), mctrler_total(mcr) / 1024);
 	put_str(_backbuf, btif->xs, 0, 32, 3, s);
@@ -76,6 +86,7 @@ void MonkeyMain(void) {
 					//解析成功
 					sprintf(s, "mouse:[lcr %d %d]", mouse_decoder.x, mouse_decoder.y);
 					if ((mouse_decoder.btn & 0x01) != 0) {
+						// _shutdown();
 						s[7] = 'L';
 					}
 					if ((mouse_decoder.btn & 0x02) != 0) {

@@ -58,6 +58,12 @@ struct sctrler {
 	struct sheet shts0[MAX_SHEETS];
 };
 
+struct mwindow {
+	char *title;
+	unsigned char *buf;
+	int xs, ys;
+};
+
 //func.nas
 void io_hlt(void);
 void io_outp8(int port, int data);
@@ -75,6 +81,7 @@ int io_inp8(int port);
 int load_cr0(void);
 void save_cr0(int cr0);
 int getmemx(int start, int end);
+void _shutdown(void);
 
 //graghic.c
 void init_palette(void);
@@ -164,5 +171,8 @@ void sctrler_slide(struct sctrler *xmain, struct sheet *sht, int vx0, int vy0);
 void sctrler_setheight(struct sctrler *xmain, struct sheet *sht, int height);
 void sctrler_free(struct sctrler *xmain, struct sheet *sht);
 
+//window.c
+struct mwindow *init_mwindow(char *title, unsigned char *buf, int xs, int ys);
+void mwindow_draw(struct mwindow *xmain);
 
 #endif

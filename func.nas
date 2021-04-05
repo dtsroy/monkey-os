@@ -9,7 +9,7 @@
 		GLOBAL _ihr21x, _ihr27x, _ihr2cx
 		GLOBAL _io_inp8, _io_shlt
 		GLOBAL _load_cr0, _save_cr0
-		GLOBAL _getmemx
+		GLOBAL _getmemx, __shutdown
 
 		EXTERN _ihr21, _ihr27, _ihr2c
 
@@ -157,3 +157,9 @@ gmfin:
 	POP ESI
 	POP EDI
 	RET
+
+__shutdown:
+	MOV AX, 0x2001
+	MOV DX, 0x1004
+	OUT DX, AX
+	;RET

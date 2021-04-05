@@ -1,10 +1,7 @@
 #include "mkpack.h"
 
 void init_screen(unsigned char *vram, int xs, int ys) {
-	draw_box(vram, xs, 10, 0, 0, xs - 1, ys - 16);//主桌面
-	draw_box(vram, xs, 7, 0, ys - 15, xs - 1, ys); //任务栏主体
-	draw_box(vram, xs, 3, 0, ys - 15, xs - 305, ys); //左下角logo(虽然没图片)
-	draw_box(vram, xs, 3, xs - 3, ys - 15, xs, ys); //右下角return_to_desktop
+	draw_box(vram, xs, 10, 0, 0, xs, ys);//主桌面
 	put_str(vram, xs, 0, 0, 7, "Hello from MonkeyOS.");
 	// char *info_to_show;
 	// sprintf(info_to_show, "screen.xsize=%d, screen.ysize=%d", xs, ys);
@@ -30,8 +27,8 @@ void init_palette(void){
 		0x84, 0x84, 0x00,	/* 11:暗黄 */
 		0x00, 0x00, 0x84,	/* 12:暗青 */
 		0x84, 0x00, 0x84,	/* 13:暗紫 */
-		0x00, 0x84, 0x84,	/* 14:浅暗蓝 */ //008484
-		0x84, 0x84, 0x84 	/* 15:暗灰 */ //848484
+		0x00, 0x84, 0x84,	/* 14:浅暗蓝 */
+		0x84, 0x84, 0x84 	/* 15:暗灰 */
 	};
 	set_palette(0, 15, table_rgb);
 	return;
@@ -54,12 +51,11 @@ void set_palette(int start, int end, unsigned char *tb) {
 
 void draw_box(unsigned char *vram, int xs, unsigned char color, int x0, int y0, int x1, int y1) {
 	int x, y;
-	for (y=y0; y<=y1; y++) {
-		for (x=x0; x<=x1; x++) {
+	for (y=y0; y<y1; y++) {
+		for (x=x0; x<x1; x++) {
 			vram[x+y*xs] = color;
 		}
 	}
-	return;
 }
 
 void init_pointer(unsigned char *msbuf, int bg) {
@@ -82,10 +78,10 @@ void init_pointer(unsigned char *msbuf, int bg) {
 		for (x=0; x<12; x++) {
 			char now = pointer[y][x];
 			if (now == '*') {
-				msbuf[x+y*12] = 0;
+				msbuf[x+y*12] = 7;
 			}
 			if (now == '0') {
-				msbuf[x+y*12] = 7;
+				msbuf[x+y*12] = 0;
 			}
 			if (now == '.') {
 				msbuf[x+y*12] = bg;
@@ -124,6 +120,6 @@ void put_str(unsigned char *vram, int xsize, int x, int y, char color, char *str
 	extern char xfont[4096];
 	for (; *str!=0x00; str++) {
 		put_font(vram, xsize, x, y, color, xfont + *str * 16);
-		x+=8;
+		x += 8;
 	}
 }
