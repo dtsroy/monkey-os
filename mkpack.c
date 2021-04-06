@@ -20,8 +20,8 @@ void MonkeyMain(void) {
 	io_sti(); //初始化完成,放开cpu中断标志
 
 	init_k_m_if(32, 128, keybuf, mousebuf);
-	io_outp8(PIC0_IMR, 0xf9); //放开键盘 && PIC1
-	io_outp8(PIC1_IMR, 0xef); //放开鼠标
+	io_outp8(PIC0_IMR, 0xf9); //放开键盘 && PIC1 11111001
+	io_outp8(PIC1_IMR, 0xef); //放开鼠标 11101111
 
 	init_keyboard();
 	init_mouse();
@@ -56,7 +56,7 @@ void MonkeyMain(void) {
 
 	testwinbuf = mctrler_allocx(mcr, 120*120);
 	sht_tw = sctrler_alloc(scr);
-	struct mwindow *tw = init_mwindow("test!", testwinbuf, 120, 120);
+	struct mwindow *tw = init_mwindow("_test!", testwinbuf, 120, 120);
 	sheet_setbuf(sht_tw, testwinbuf, 120, 120, -1);
 	mwindow_draw(tw);
 	sctrler_setheight(scr, sht_tw, 1);
@@ -76,7 +76,7 @@ void MonkeyMain(void) {
 				i = fifo_get(&k_if);
 				io_sti();
 				sprintf(s, "%02X", i);
-				draw_box(_backbuf, btif->xs, 10, 0, 16, 15, 31);
+				draw_box(_backbuf, btif->xs, 0, 0, 16, 15, 31);
 				put_str(_backbuf, btif->xs, 0, 16, 3, s);
 				sctrler_refresh(scr, sht_back, 0, 16, 16, 32);
 			}else if (ms != 0) {
@@ -95,7 +95,7 @@ void MonkeyMain(void) {
 					if ((mouse_decoder.btn & 0x04) != 0) {
 						s[8] = 'C';
 					}
-					draw_box(_backbuf, btif->xs, 10, 33, 16, 320, 31);
+					draw_box(_backbuf, btif->xs, 0, 33, 16, 320, 31);
 					put_str(_backbuf, btif->xs, 32, 16, 3, s);
 					sctrler_refresh(scr, sht_back, 32, 16, 320, 32);
 					//隐藏鼠标
@@ -117,8 +117,8 @@ void MonkeyMain(void) {
 						my = btif->ys - 1;
 					}
 					sprintf(s, "(%d, %d)", mx, my);
-					draw_box(_backbuf, btif->xs, 10, 0, 0, 320, 16);
-					put_str(_backbuf, btif->xs, 3, 0, 0, s);
+					draw_box(_backbuf, btif->xs, 0, 0, 0, 320, 16);
+					put_str(_backbuf, btif->xs, 0, 0, 7, s);
 					sctrler_refresh(scr, sht_back, 0, 0, 320, 16);
 					sctrler_refresh(scr, sht_ms, 0, 16, 80, 16);
 					sctrler_slide(scr, sht_ms, mx, my);

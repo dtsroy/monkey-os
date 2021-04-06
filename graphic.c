@@ -1,14 +1,11 @@
 #include "mkpack.h"
 
 void init_screen(unsigned char *vram, int xs, int ys) {
-	draw_box(vram, xs, 10, 0, 0, xs, ys);//主桌面
+	draw_box(vram, xs, 0, 0, 0, xs, ys);//主桌面
 	put_str(vram, xs, 0, 0, 7, "Hello from MonkeyOS.");
 	// char *info_to_show;
 	// sprintf(info_to_show, "screen.xsize=%d, screen.ysize=%d", xs, ys);
 	// put_str(vram, xs, 0, 15, 3, info_to_show);
-
-	
-	return;
 }
 
 void init_palette(void){
@@ -28,9 +25,10 @@ void init_palette(void){
 		0x00, 0x00, 0x84,	/* 12:暗青 */
 		0x84, 0x00, 0x84,	/* 13:暗紫 */
 		0x00, 0x84, 0x84,	/* 14:浅暗蓝 */
-		0x84, 0x84, 0x84 	/* 15:暗灰 */
+		0x84, 0x84, 0x84, 	/* 15:暗灰 */ //窗口顶端
+		0x32, 0x32, 0x32    /* 16:窗口底板 */
 	};
-	set_palette(0, 15, table_rgb);
+	set_palette(0, 16, table_rgb);
 	return;
 }
 

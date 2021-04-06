@@ -23,7 +23,7 @@ void mwindow_draw(struct mwindow *xmain) {
 	};
 	char color;
 	int x, y;
-	draw_box(xmain->buf, xmain->xs, 0, 0, 0, xmain->xs, xmain->ys); //主体
+	draw_box(xmain->buf, xmain->xs, 16, 0, 0, xmain->xs, xmain->ys); //主体
 	draw_box(xmain->buf, xmain->xs, 15, 0, 0, xmain->xs, 16); //顶端栏
 	put_str(xmain->buf, xmain->xs, 17, 0, 7, xmain->title); //标题 给图标流出空间
 	for (x=0; x<12; x++) {

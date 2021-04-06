@@ -5,6 +5,8 @@ struct sctrler *init_sctrler(struct mctrler *xmain, unsigned int vram, int xs, i
 	int i;
 	ret = (struct sctrler *) mctrler_allocx(xmain, sizeof(struct sctrler));
 	if (ret == 0) {goto err;}
+	ret->map = (unsigned char *) mctrler_allocx(xmain, xs * ys);
+	if (ret->map == 0) {goto err;}
 	ret->vram = vram;
 	ret->xs = xs;
 	ret->ys = ys;
@@ -59,6 +61,8 @@ void sctrler_setheight(struct sctrler *xmain, struct sheet *sht, int height) {
 				xmain->shts[tmp]->height = tmp;
 			}
 			xmain->shts[height] = sht;
+			sctrler_refreshmap(xmain, sht->vx0, sht->vy0, sht->vx0 + sht->bxs, sht->vy0 + sht->bys, height+1);
+			sctrler_refreshx(xmain, sht->vx0, sht->vy0, sht->vx0 + sht->bxs, sht->vy0 + sht->bys, height+1, old);
 		} else {
 			if (xmain->top > old) {
 				//去掉old,再前移
@@ -68,9 +72,11 @@ void sctrler_setheight(struct sctrler *xmain, struct sheet *sht, int height) {
 				}
 			}
 			//显示中被删了一个,top-1
+			sctrler_refreshmap(xmain, sht->vx0, sht->vy0, sht->vx0 + sht->bxs, sht->vy0 + sht->bys, 0);
+			sctrler_refreshx(xmain, sht->vx0, sht->vy0, sht->vx0 + sht->bxs, sht->vy0 + sht->bys, 0, old-1);
 			xmain->top--;
 		}
-		sctrler_refreshx(xmain, sht->vx0, sht->vy0, sht->vx0 + sht->bxs, sht->vy0 + sht->bys);
+
 	} else if (height > old) {
 		//比以前高
 		if (old >= 0) {
@@ -89,20 +95,21 @@ void sctrler_setheight(struct sctrler *xmain, struct sheet *sht, int height) {
 			xmain->shts[height] = sht;
 			xmain->top++;
 		}
-		sctrler_refreshx(xmain, sht->vx0, sht->vy0, sht->vx0 + sht->bxs, sht->vy0 + sht->bys);
+		sctrler_refreshmap(xmain, sht->vx0, sht->vy0, sht->vx0 + sht->bxs, sht->vy0 + sht->bys, height);
+		sctrler_refreshx(xmain, sht->vx0, sht->vy0, sht->vx0 + sht->bxs, sht->vy0 + sht->bys, height, height);
 	}
 }
 
 void sctrler_refresh(struct sctrler *xmain, struct sheet *sht, int bx0, int by0, int bx1, int by1) {
 	if (sht->height >= 0) {
 		//显示中
-		sctrler_refreshx(xmain, sht->vx0 + bx0, sht->vy0 + by0, sht->vx0 + bx1, sht->vy0 + by1);
+		sctrler_refreshx(xmain, sht->vx0 + bx0, sht->vy0 + by0, sht->vx0 + bx1, sht->vy0 + by1, sht->height, sht->height);
 	}
 }
 
-void sctrler_refreshx(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1) {
+void sctrler_refreshx(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1, int h0, int h1) {
 	int h, bx, by, vx, vy, bx0, by0, bx1, by1;
-	unsigned char *buf, c, *vram=xmain->vram;
+	unsigned char *buf, c, *vram=xmain->vram, *map = xmain->map, sid;
 	struct sheet *sht;
 
 	if (vx0 < 0) {vx0 = 0;}
@@ -113,6 +120,7 @@ void sctrler_refreshx(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1)
 	for (h=0; h<=xmain->top; h++) {
 		sht = xmain->shts[h];
 		buf = sht->buf;
+		sid = sht - xmain->shts0;
 		//推到刷新范围
 		bx0 = vx0 - sht->vx0;
 		by0 = vy0 - sht->vy0;
@@ -130,8 +138,43 @@ void sctrler_refreshx(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1)
 			for (bx=bx0; bx<bx1; bx++) {
 				vx = sht->vx0 + bx;
 				c = buf[by * sht->bxs + bx];
-				if (c != sht->cliv) {
+				if (map[vy * xmain->xs + vx] == sid) {
 					vram[vy * xmain->xs + vx] = c;
+				}
+			}
+		}
+	}
+}
+
+void sctrler_refreshmap(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1, int h0) {
+	int h, bx, by, vx, vy, bx0, by0, bx1, by1;
+	unsigned char *buf, sid, *map = xmain->map;
+	struct sheet *sht;
+
+	if (vx0 < 0) { vx0 = 0; }
+	if (vy0 < 0) { vy0 = 0; }
+	if (vx1 > xmain->xs) { vx1 = xmain->xs; }
+	if (vy1 > xmain->ys) { vy1 = xmain->ys; }
+
+	for (h = h0; h <= xmain->top; h++) {
+		sht = xmain->shts[h];
+		sid = sht - xmain->shts0; /* 将进行了减法计算的地址作为图层号码使用 */
+		buf = sht->buf;
+		bx0 = vx0 - sht->vx0;
+		by0 = vy0 - sht->vy0;
+		bx1 = vx1 - sht->vx0;
+		by1 = vy1 - sht->vy0;
+		if (bx0 < 0) {bx0 = 0;}
+		if (by0 < 0) {by0 = 0;}
+		if (bx1 > sht->bxs) {bx1 = sht->bxs;}
+		if (by1 > sht->bys) {by1 = sht->bys;}
+
+		for (by = by0; by < by1; by++) {
+			vy = sht->vy0 + by;
+			for (bx = bx0; bx < bx1; bx++) {
+				vx = sht->vx0 + bx;
+				if (buf[by * sht->bxs + bx] != sht->cliv) {
+					map[vy * xmain->xs + vx] = sid;
 				}
 			}
 		}
@@ -143,8 +186,10 @@ void sctrler_slide(struct sctrler *xmain, struct sheet *sht, int vx0, int vy0) {
 	sht->vx0 = vx0;
 	sht->vy0 = vy0;
 	if (sht->height >= 0) {
-		sctrler_refreshx(xmain, ox, oy, ox+sht->bxs, oy+sht->bys);
-		sctrler_refreshx(xmain, vx0, vy0, vx0 + sht->bxs, vy0 + sht->bys);
+		sctrler_refreshmap(xmain, ox, oy, ox + sht->bxs, oy + sht->bys, 0);
+		sctrler_refreshmap(xmain, vx0, vy0, vx0 + sht->bxs, vy0 + sht->bys, sht->height);
+		sctrler_refreshx(xmain, ox, oy, ox+sht->bxs, oy+sht->bys, 0, sht->height-1);
+		sctrler_refreshx(xmain, vx0, vy0, vx0 + sht->bxs, vy0 + sht->bys, sht->height, sht->height);
 	}
 }
 
