@@ -37,19 +37,19 @@ entry:
 	;读盘
 	MOV AX,0x0820
 	MOV ES,AX
-	MOV CH,0 ;0ZHUMIAN
-	MOV DH,0 ;0CITOU
-	MOV CL,2 ;2SHANQU前一[1]个扇区装了启动区512字节
+	MOV CH,0 ;0柱面
+	MOV DH,0 ;0磁头
+	MOV CL,2 ;2扇区前一[1]个扇区装了启动区512字节
 
 readloop:
-	MOV SI,0 ;SHIBAICISHU
+	MOV SI,0 ;失败
 
 retry: ;CHONGSHI
 	MOV AH,0x02
 	MOV AL,1 ;YIGE SHANQU
 	MOV BX,0 ;HUANCHONG
-	MOV DL,0x00 ;Aqudongqi
-	INT 0x13 ;BIOSdigoyong
+	MOV DL,0x00 ;A驱动器
+	INT 0x13 ;BIOS调用
 	JNC next 
 	ADD SI,1 ;失败+1
 	CMP SI,5 ;失败和5比较

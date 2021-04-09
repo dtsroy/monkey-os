@@ -28,7 +28,7 @@ _io_sti:
 	RET
 
 _io_outp8: ; void io_outp8(int port, int data);
-	MOV EDX,[ESP+4]
+	MOV DX,[ESP+4]
 	MOV AL,[ESP+8]
 	OUT DX,AL
 	RET
@@ -46,70 +46,70 @@ _io_save_eflags:
 	RET
 
 _load_gdtr:		; void load_gdtr(int limit, int addr);
-		MOV		AX,[ESP+4]		; limit
-		MOV		[ESP+6],AX
-		LGDT	[ESP+6]
-		RET
+	MOV		AX,[ESP+4]		; limit
+	MOV		[ESP+6],AX
+	LGDT	[ESP+6]
+	RET
 
 _load_idtr:		; void load_idtr(int limit, int addr);
-		MOV		AX,[ESP+4]		; limit
-		MOV		[ESP+6],AX
-		LIDT	[ESP+6]
-		RET
+	MOV		AX,[ESP+4]		; limit
+	MOV		[ESP+6],AX
+	LIDT	[ESP+6]
+	RET
 
 _ihr21x:
-		PUSH	ES
-		PUSH	DS
-		PUSHAD
-		MOV		EAX,ESP
-		PUSH	EAX
-		MOV		AX,SS
-		MOV		DS,AX
-		MOV		ES,AX
-		CALL	_ihr21
-		POP		EAX
-		POPAD
-		POP		DS
-		POP		ES
-		IRETD
+	PUSH	ES
+	PUSH	DS
+	PUSHAD
+	MOV		EAX,ESP
+	PUSH	EAX
+	MOV		AX,SS
+	MOV		DS,AX
+	MOV		ES,AX
+	CALL	_ihr21
+	POP		EAX
+	POPAD
+	POP		DS
+	POP		ES
+	IRETD
 
 _ihr27x:
-		PUSH	ES
-		PUSH	DS
-		PUSHAD
-		MOV		EAX,ESP
-		PUSH	EAX
-		MOV		AX,SS
-		MOV		DS,AX
-		MOV		ES,AX
-		CALL	_ihr27
-		POP		EAX
-		POPAD
-		POP		DS
-		POP		ES
-		IRETD
+	PUSH	ES
+	PUSH	DS
+	PUSHAD
+	MOV		EAX,ESP
+	PUSH	EAX
+	MOV		AX,SS
+	MOV		DS,AX
+	MOV		ES,AX
+	CALL	_ihr27
+	POP		EAX
+	POPAD
+	POP		DS
+	POP		ES
+	IRETD
 
 _ihr2cx:
-		PUSH	ES
-		PUSH	DS
-		PUSHAD
-		MOV		EAX,ESP
-		PUSH	EAX
-		MOV		AX,SS
-		MOV		DS,AX
-		MOV		ES,AX
-		CALL	_ihr2c
-		POP		EAX
-		POPAD
-		POP		DS
-		POP		ES
-		IRETD
+	PUSH	ES
+	PUSH	DS
+	PUSHAD
+	MOV		EAX,ESP
+	PUSH	EAX
+	MOV		AX,SS
+	MOV		DS,AX
+	MOV		ES,AX
+	CALL	_ihr2c
+	POP		EAX
+	POPAD
+	POP		DS
+	POP		ES
+	IRETD
 
 _io_inp8:	; int io_inp8(int port);
-		MOV		EDX,[ESP+4]		; port
-		MOV		EAX,0
-		IN		AL,DX
-		RET
+	MOV		EDX,[ESP+4]		; port
+	MOV		EAX,0
+	IN		AL,DX
+	RET
 
 _io_shlt:
 	STI

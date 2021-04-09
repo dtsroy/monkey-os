@@ -60,7 +60,7 @@ void MonkeyMain(void) {
 	sheet_setbuf(sht_tw, testwinbuf, 120, 120, -1);
 	mwindow_draw(tw);
 	sctrler_setheight(scr, sht_tw, 1);
-	sctrler_slide(scr, sht_tw, 12, 9);
+	sctrler_slide(scr, sht_tw, 300, 390);
 
 	sprintf(s, "memory %dMB, free:%dkb", memtotal / (1024*1024), mctrler_total(mcr) / 1024);
 	put_str(_backbuf, btif->xs, 0, 32, 3, s);
