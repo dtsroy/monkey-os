@@ -1,6 +1,6 @@
 #include "mkpack.h"
 
-void init_fifo(struct fifo *xmain, int size, int *buf) {
+void init_fifo(struct fifo *xmain, int size, unsigned int *buf) {
 	xmain->sz = size;
 	xmain->wp = 0;
 	xmain->rp = 0;

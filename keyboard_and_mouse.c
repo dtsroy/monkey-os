@@ -1,13 +1,5 @@
 #include "mkpack.h"
 
-struct fifo k_if;
-struct fifo m_if;
-
-void init_k_m_if(int ks, int ms, char *kb, char *mb) {
-	init_fifo(&k_if, ks, kb);
-	init_fifo(&m_if, ms, mb);
-}
-
 void wait_kr(void) {
 	for (;;) {
 		if ((io_inp8(P_KEYSTA) & 0x02) == 0) {

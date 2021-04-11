@@ -1,42 +1,47 @@
 #include "mkpack.h"
 
-extern struct fifo k_if, m_if;
+struct fifo xmainfifobuf;
 
 void MonkeyMain(void) {
 	struct BootInfo *btif = (struct BootInfo*) 0x0ff0;
-	char *s, keybuf[32], mousebuf[128], _mscur[12*12], *_backbuf;
-	char *testwinbuf;
-	int i, mx, my;
-	unsigned int memtotal;
-	struct mdec mouse_decoder;
-	struct sctrler *scr;
-	struct sheet *sht_ms, *sht_back;
-	struct sheet *sht_tw;
-	mx = (btif->xs - 12) / 2;
-	my = (btif->ys - 12 - 14) / 2;
+	char *s;
+	int i;
+	unsigned int xmainfifobuf_buf[512];
+	init_fifo(&xmainfifobuf, 512, xmainfifobuf_buf);
 
+	//GDT IDT PIC 初始化
 	init_gdtidt();
 	init_pic();
 	io_sti(); //初始化完成,放开cpu中断标志
 
-	init_k_m_if(32, 128, keybuf, mousebuf);
 	io_outp8(PIC0_IMR, 0xf9); //放开键盘 && PIC1 11111001
 	io_outp8(PIC1_IMR, 0xef); //放开鼠标 11101111
-
+	
+	//键鼠初始化
+	struct mdec mouse_decoder;
 	init_keyboard();
 	init_mouse();
 	mouse_decoder.st = 0;
 
+	//内存管理初始化
 	struct mctrler *mcr = (struct mctrler *)MCTRLER_ADDR;
 
-	memtotal = getmem(0x400000, 0xfffffffffffffffffffff);//0xffffffff
+	unsigned int memtotal = getmem(0x400000, 0xfffffffffffffffffffff);//0xffffffff
 	init_mctrler(mcr);
 	mctrler_free(mcr, 0x1000, 0x9e000);
 	mctrler_free(mcr, 0x400000, memtotal - 0x400000);
 
+	//显示相关
 	init_palette();
+	char _mscur[12*12], *_backbuf, *testwinbuf;
 	
-	// char *xx = mctrler_allocx(mcr, 0x1000);
+	//图层相关
+	struct sctrler *scr;
+	struct sheet *sht_ms, *sht_back;
+	struct sheet *sht_tw;
+	int mx = (btif->xs - 12) / 2;
+	int my = (btif->ys - 12 - 14) / 2;
+
 	scr = init_sctrler(mcr, btif->vram, btif->xs, btif->ys);
 	sht_back = sctrler_alloc(scr);
 	sht_ms = sctrler_alloc(scr);
@@ -45,6 +50,7 @@ void MonkeyMain(void) {
 	sheet_setbuf(sht_back, _backbuf, btif->xs, btif->ys, -1);
 	sheet_setbuf(sht_ms, _mscur, 12, 12, 99);
 
+	//屏幕初始化1次
 	init_screen(_backbuf, btif->xs, btif->ys);
 	init_pointer(_mscur, 99);
 
@@ -54,6 +60,7 @@ void MonkeyMain(void) {
 	sctrler_setheight(scr, sht_back, 0);
 	sctrler_setheight(scr, sht_ms, 2);
 
+	//窗口测试
 	testwinbuf = mctrler_allocx(mcr, 120*120);
 	sht_tw = sctrler_alloc(scr);
 	struct mwindow *tw = init_mwindow("_test!", testwinbuf, 120, 120);
@@ -67,22 +74,18 @@ void MonkeyMain(void) {
 	sctrler_refresh(scr, sht_back, 0, 0, btif->xs, btif->ys);
 	for (;;) {
 		io_cli();
-		int ks = fifo_sts(&k_if);
-		int ms = fifo_sts(&m_if);
-		if (ks + ms == 0) {
-			io_shlt();
+		if (fifo_sts(&xmainfifobuf) == 0) {
+			io_sti();
 		}else {
-			if (ks != 0) {
-				i = fifo_get(&k_if);
-				io_sti();
-				sprintf(s, "%02X", i);
+			i = fifo_get(&xmainfifobuf);
+			io_sti();
+			if (256 <= i && i <= 511) {
+				sprintf(s, "%02X", i - K_DT0);
 				draw_box(_backbuf, btif->xs, 0, 0, 16, 15, 31);
 				put_str(_backbuf, btif->xs, 0, 16, 3, s);
 				sctrler_refresh(scr, sht_back, 0, 16, 16, 32);
-			}else if (ms != 0) {
-				i = fifo_get(&m_if);
-				io_sti();
-				if (mdecode(&mouse_decoder, i) != 0) {
+			}else if (512 <= i <= 767) {
+				if (mdecode(&mouse_decoder, i - M_DT0) != 0) {
 					//解析成功
 					sprintf(s, "mouse:[lcr %d %d]", mouse_decoder.x, mouse_decoder.y);
 					if ((mouse_decoder.btn & 0x01) != 0) {

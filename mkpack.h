@@ -23,7 +23,7 @@ struct GATE_DESCRIPTOR {
 };
 
 struct fifo {
-	unsigned char *addr; //缓冲区地址
+	int *addr; //缓冲区地址
 	int wp, rp, sz, free, flag; //写入指针,读取指针,大小,空余,是否溢出(0, -1)
 };
 
@@ -132,7 +132,7 @@ void ihr27(int *esp);
 void ihr2c(int *esp);
 
 //fifo.c
-void init_fifo(struct fifo *xmain, int size, int *buf);
+void init_fifo(struct fifo *xmain, int size, unsigned int *buf);
 int fifo_put(struct fifo *xmain, int dat);
 int fifo_get(struct fifo *xmain);
 int fifo_sts(struct fifo *xmain);
@@ -145,7 +145,9 @@ int fifo_sts(struct fifo *xmain);
 #define KBC_MODE 0x47
 #define KEYCMD_SENDTO_MOUSE 0xd4
 #define MOUSECMD_ENABLE 0xf4
-void init_k_m_if(int ks, int ms, char *kb, char *mb);
+
+#define K_DT0 256
+#define M_DT0 512
 void wait_kr(void);
 void init_keyboard(void);
 void init_mouse(void);

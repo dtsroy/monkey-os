@@ -1,6 +1,6 @@
 #include "mkpack.h"
 
-extern struct fifo k_if, m_if;
+extern struct fifo xmainfifobuf;
 
 void init_pic(void) {
 	io_outp8(PIC0_IMR, 0xff); //主PIC屏蔽所有中断
@@ -24,7 +24,7 @@ void ihr21(int *esp) { //键盘中断
 	unsigned char *dat;
 	io_outp8(PIC0_OCW, 0x61); //IQR1受理完毕
 	dat = io_inp8(P_KEYDAT);
-	fifo_put(&k_if, dat);
+	fifo_put(&xmainfifobuf, dat + K_DT0);
 }
 
 void ihr27(int *esp) { //别管这是啥了
@@ -37,5 +37,5 @@ void ihr2c(int *esp) { //鼠标中断
 	io_outp8(PIC1_OCW, 0x64);
 	io_outp8(PIC0_OCW, 0x62); //受理完毕
 	dat = io_inp8(P_KEYDAT);
-	fifo_put(&m_if, dat);
+	fifo_put(&xmainfifobuf, dat + M_DT0);
 }
