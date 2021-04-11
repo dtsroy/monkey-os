@@ -1,6 +1,6 @@
 #include "mkpack.h"
 
-void init_fifo(struct fifo *xmain, int size, unsigned char *buf) {
+void init_fifo(struct fifo *xmain, int size, int *buf) {
 	xmain->sz = size;
 	xmain->wp = 0;
 	xmain->rp = 0;
@@ -9,7 +9,7 @@ void init_fifo(struct fifo *xmain, int size, unsigned char *buf) {
 	xmain->flag = 0;
 }
 
-int fifo_put(struct fifo *xmain, unsigned char dat) {
+int fifo_put(struct fifo *xmain, int dat) {
 	if (xmain->free == 0) {
 		//溢出了
 		xmain->flag = 1;

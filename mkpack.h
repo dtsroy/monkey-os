@@ -132,8 +132,8 @@ void ihr27(int *esp);
 void ihr2c(int *esp);
 
 //fifo.c
-void init_fifo(struct fifo *xmain, int size, unsigned char *buf);
-int fifo_put(struct fifo *xmain, unsigned char dat);
+void init_fifo(struct fifo *xmain, int size, int *buf);
+int fifo_put(struct fifo *xmain, int dat);
 int fifo_get(struct fifo *xmain);
 int fifo_sts(struct fifo *xmain);
 
