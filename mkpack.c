@@ -26,7 +26,7 @@ void MonkeyMain(void) {
 	//内存管理初始化
 	struct mctrler *mcr = (struct mctrler *)MCTRLER_ADDR;
 
-	unsigned int memtotal = getmem(0x400000, 0xfffffffffffffffffffff);//0xffffffff
+	unsigned int memtotal = getmem(0x400000, 0xfffffffff);
 	init_mctrler(mcr);
 	mctrler_free(mcr, 0x1000, 0x9e000);
 	mctrler_free(mcr, 0x400000, memtotal - 0x400000);
@@ -57,8 +57,8 @@ void MonkeyMain(void) {
 	sctrler_slide(scr, sht_back, 0, 0);
 	
 	sctrler_slide(scr, sht_ms, mx, my);
-	sctrler_setheight(scr, sht_back, 0);
-	sctrler_setheight(scr, sht_ms, 2);
+	sheet_setheight(sht_back, 0);
+	sheet_setheight(sht_ms, 2);
 
 	//窗口测试
 	testwinbuf = mctrler_allocx(mcr, 120*120);
@@ -66,7 +66,7 @@ void MonkeyMain(void) {
 	struct mwindow *tw = init_mwindow("_test!", testwinbuf, 120, 120);
 	sheet_setbuf(sht_tw, testwinbuf, 120, 120, -1);
 	mwindow_draw(tw);
-	sctrler_setheight(scr, sht_tw, 1);
+	sheet_setheight(sht_tw, 1);
 	sctrler_slide(scr, sht_tw, 300, 390);
 
 	sprintf(s, "memory %dMB, free:%dkb", memtotal / (1024*1024), mctrler_total(mcr) / 1024);

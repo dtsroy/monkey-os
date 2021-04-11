@@ -46,6 +46,7 @@ struct mctrler {
 
 struct sheet {
 	unsigned char *buf;
+	struct sctrler *scr;
 	int bxs, bys, vx0, vy0, cliv, height, flag;
 };
 
@@ -57,6 +58,8 @@ struct sctrler {
 	struct sheet *shts[MAX_SHEETS];
 	struct sheet shts0[MAX_SHEETS];
 };
+
+
 
 struct mwindow {
 	char *title;
@@ -166,13 +169,16 @@ int mctrler_freex(struct mctrler *xmain, unsigned int addr, unsigned int size);
 //sheet.c
 struct sctrler *init_sctrler(struct mctrler *xmain, unsigned int vram, int xs, int ys);
 struct sheet *sctrler_alloc(struct sctrler *xmain);
-void sheet_setbuf(struct sheet *xmain, unsigned char *buf, int xs, int ys, int cliv);
+
 void sctrler_refresh(struct sctrler *xmain, struct sheet *sht, int bx0, int by0, int bx1, int by1);
 void sctrler_refreshx(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1, int h0, int h1);
 void sctrler_slide(struct sctrler *xmain, struct sheet *sht, int vx0, int vy0);
-void sctrler_setheight(struct sctrler *xmain, struct sheet *sht, int height);
-void sctrler_free(struct sctrler *xmain, struct sheet *sht);
+
 void sctrler_refreshmap(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1, int h0);
+
+void sheet_setbuf(struct sheet *xmain, unsigned char *buf, int xs, int ys, int cliv);
+void sheet_setheight(struct sheet *sht, int height);
+void sheet_free(struct sheet *sht);
 
 //window.c
 struct mwindow *init_mwindow(char *title, unsigned char *buf, int xs, int ys);

@@ -26,6 +26,7 @@ struct sheet *sctrler_alloc(struct sctrler *xmain) {
 			ret = &xmain->shts0[i];
 			ret->flag = 1;
 			ret->height = -1;
+			ret->scr = xmain;
 			return ret;
 		}
 	}
@@ -39,7 +40,8 @@ void sheet_setbuf(struct sheet *xmain, unsigned char *buf, int xs, int ys, int c
 	xmain->cliv = cliv;
 }
 
-void sctrler_setheight(struct sctrler *xmain, struct sheet *sht, int height) {
+void sheet_setheight(struct sheet *sht, int height) {
+	struct sctrler *xmain = sht->scr;
 	int tmp, old = sht->height;
 	//调整高度
 	if (height > xmain->top + 1) {
@@ -193,9 +195,9 @@ void sctrler_slide(struct sctrler *xmain, struct sheet *sht, int vx0, int vy0) {
 	}
 }
 
-void sctrler_free(struct sctrler *xmain, struct sheet *sht) {
+void sheet_free(struct sheet *sht) {
 	if (sht->height >= 0) {
-		sctrler_setheight(xmain, sht, -1);
+		sheet_setheight(sht, -1);
 	}
 	sht->flag = 0;
 }
