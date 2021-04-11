@@ -102,7 +102,8 @@ void sheet_setheight(struct sheet *sht, int height) {
 	}
 }
 
-void sctrler_refresh(struct sctrler *xmain, struct sheet *sht, int bx0, int by0, int bx1, int by1) {
+void sheet_refresh(struct sheet *sht, int bx0, int by0, int bx1, int by1) {
+	struct sctrler *xmain = sht->scr;
 	if (sht->height >= 0) {
 		//显示中
 		sctrler_refreshx(xmain, sht->vx0 + bx0, sht->vy0 + by0, sht->vx0 + bx1, sht->vy0 + by1, sht->height, sht->height);
@@ -183,7 +184,8 @@ void sctrler_refreshmap(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy
 	}
 }
 
-void sctrler_slide(struct sctrler *xmain, struct sheet *sht, int vx0, int vy0) {
+void sheet_slide(struct sheet *sht, int vx0, int vy0) {
+	struct sctrler *xmain = sht->scr;
 	int ox=sht->vx0, oy = sht->vy0;
 	sht->vx0 = vx0;
 	sht->vy0 = vy0;

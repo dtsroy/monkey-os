@@ -10,63 +10,6 @@ struct BootInfo
 	char *vram;
 };
 
-//GDT, IDT相关
-struct SEGMENT_DESCRIPTOR {
-	short limit_low, base_low;
-	char base_mid, access_right;
-	char limit_high, base_high;
-};
-struct GATE_DESCRIPTOR {
-	short offset_low, selector;
-	char dw_count, access_right;
-	short offset_high;
-};
-
-struct fifo {
-	int *addr; //缓冲区地址
-	int wp, rp, sz, free, flag; //写入指针,读取指针,大小,空余,是否溢出(0, -1)
-};
-
-struct mdec {
-	unsigned char buf[3], st;
-	int x, y, btn;
-};
-
-struct freeif {
-	unsigned addr, size;
-};
-
-#define MCTRLER_MAX_FREES 4096
-#define MCTRLER_ADDR 0x3c0000 //内存控制地址
-
-struct mctrler {
-	int frees, maxfrees, losts, lostsize;
-	struct freeif free[MCTRLER_MAX_FREES];
-};
-
-struct sheet {
-	unsigned char *buf;
-	struct sctrler *scr;
-	int bxs, bys, vx0, vy0, cliv, height, flag;
-};
-
-#define MAX_SHEETS 256
-
-struct sctrler {
-	unsigned char *vram, *map;
-	int xs, ys, top;
-	struct sheet *shts[MAX_SHEETS];
-	struct sheet shts0[MAX_SHEETS];
-};
-
-
-
-struct mwindow {
-	char *title;
-	unsigned char *buf;
-	int xs, ys;
-};
-
 //func.nas
 void io_hlt(void);
 void io_outp8(int port, int data);
@@ -103,6 +46,18 @@ void fin(void);
 unsigned char test486(void);
 
 //init_dt.c
+struct SEGMENT_DESCRIPTOR {
+	short limit_low, base_low;
+	char base_mid, access_right;
+	char limit_high, base_high;
+};
+
+struct GATE_DESCRIPTOR {
+	short offset_low, selector;
+	char dw_count, access_right;
+	short offset_high;
+};
+
 #define ADR_IDT			0x0026f800
 #define LIMIT_IDT		0x000007ff
 #define ADR_GDT			0x00270000
@@ -135,6 +90,11 @@ void ihr27(int *esp);
 void ihr2c(int *esp);
 
 //fifo.c
+struct fifo {
+	int *addr; //缓冲区地址
+	int wp, rp, sz, free, flag; //写入指针,读取指针,大小,空余,是否溢出(0, -1)
+};
+
 void init_fifo(struct fifo *xmain, int size, unsigned int *buf);
 int fifo_put(struct fifo *xmain, int dat);
 int fifo_get(struct fifo *xmain);
@@ -151,14 +111,29 @@ int fifo_sts(struct fifo *xmain);
 
 #define K_DT0 256
 #define M_DT0 512
+struct mdec {
+	unsigned char buf[3], st;
+	int x, y, btn;
+};
+
 void wait_kr(void);
 void init_keyboard(void);
 void init_mouse(void);
 int mdecode(struct mdec *xmain, unsigned char *dat);
 
 //memory.c
-#define CR0_CACHE_DISABLE 0x60000000
+#define MCTRLER_MAX_FREES 4096
+#define MCTRLER_ADDR 0x3c0000 //内存控制地址
+struct freeif {
+	unsigned addr, size;
+};
+struct mctrler {
+	int frees, maxfrees, losts, lostsize;
+	struct freeif free[MCTRLER_MAX_FREES];
+};
 
+
+#define CR0_CACHE_DISABLE 0x60000000
 void init_mctrler(struct mctrler *xmain);
 unsigned int mctrler_total(struct mctrler *xmain);
 unsigned int mctrler_alloc(struct mctrler *xmain, unsigned int size);
@@ -167,20 +142,38 @@ unsigned int mctrler_allocx(struct mctrler *xmain, unsigned int size);
 int mctrler_freex(struct mctrler *xmain, unsigned int addr, unsigned int size);
 
 //sheet.c
+#define MAX_SHEETS 256
+struct sheet {
+	unsigned char *buf;
+	struct sctrler *scr;
+	int bxs, bys, vx0, vy0, cliv, height, flag;
+};
+struct sctrler {
+	unsigned char *vram, *map;
+	int xs, ys, top;
+	struct sheet *shts[MAX_SHEETS];
+	struct sheet shts0[MAX_SHEETS];
+};
+
 struct sctrler *init_sctrler(struct mctrler *xmain, unsigned int vram, int xs, int ys);
 struct sheet *sctrler_alloc(struct sctrler *xmain);
 
-void sctrler_refresh(struct sctrler *xmain, struct sheet *sht, int bx0, int by0, int bx1, int by1);
 void sctrler_refreshx(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1, int h0, int h1);
-void sctrler_slide(struct sctrler *xmain, struct sheet *sht, int vx0, int vy0);
-
 void sctrler_refreshmap(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1, int h0);
 
+void sheet_refresh(struct sheet *sht, int bx0, int by0, int bx1, int by1);
 void sheet_setbuf(struct sheet *xmain, unsigned char *buf, int xs, int ys, int cliv);
 void sheet_setheight(struct sheet *sht, int height);
 void sheet_free(struct sheet *sht);
+void sheet_slide(struct sheet *sht, int vx0, int vy0);
 
 //window.c
+struct mwindow {
+	char *title;
+	unsigned char *buf;
+	int xs, ys;
+};
+
 struct mwindow *init_mwindow(char *title, unsigned char *buf, int xs, int ys);
 void mwindow_draw(struct mwindow *xmain);
 

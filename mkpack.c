@@ -54,9 +54,9 @@ void MonkeyMain(void) {
 	init_screen(_backbuf, btif->xs, btif->ys);
 	init_pointer(_mscur, 99);
 
-	sctrler_slide(scr, sht_back, 0, 0);
+	sheet_slide(sht_back, 0, 0);
 	
-	sctrler_slide(scr, sht_ms, mx, my);
+	sheet_slide(sht_ms, mx, my);
 	sheet_setheight(sht_back, 0);
 	sheet_setheight(sht_ms, 2);
 
@@ -67,11 +67,11 @@ void MonkeyMain(void) {
 	sheet_setbuf(sht_tw, testwinbuf, 120, 120, -1);
 	mwindow_draw(tw);
 	sheet_setheight(sht_tw, 1);
-	sctrler_slide(scr, sht_tw, 300, 390);
+	sheet_slide(sht_tw, 300, 390);
 
 	sprintf(s, "memory %dMB, free:%dkb", memtotal / (1024*1024), mctrler_total(mcr) / 1024);
 	put_str(_backbuf, btif->xs, 0, 32, 3, s);
-	sctrler_refresh(scr, sht_back, 0, 0, btif->xs, btif->ys);
+	sheet_refresh(sht_back, 0, 0, btif->xs, btif->ys);
 	for (;;) {
 		io_cli();
 		if (fifo_sts(&xmainfifobuf) == 0) {
@@ -83,7 +83,7 @@ void MonkeyMain(void) {
 				sprintf(s, "%02X", i - K_DT0);
 				draw_box(_backbuf, btif->xs, 0, 0, 16, 15, 31);
 				put_str(_backbuf, btif->xs, 0, 16, 3, s);
-				sctrler_refresh(scr, sht_back, 0, 16, 16, 32);
+				sheet_refresh(sht_back, 0, 16, 16, 32);
 			}else if (512 <= i <= 767) {
 				if (mdecode(&mouse_decoder, i - M_DT0) != 0) {
 					//解析成功
@@ -100,7 +100,7 @@ void MonkeyMain(void) {
 					}
 					draw_box(_backbuf, btif->xs, 0, 33, 16, 320, 31);
 					put_str(_backbuf, btif->xs, 32, 16, 3, s);
-					sctrler_refresh(scr, sht_back, 32, 16, 320, 32);
+					sheet_refresh(sht_back, 32, 16, 320, 32);
 					//隐藏鼠标
 					//draw_box(_backbuf, btif->xs, 10, mx, my, mx+12, my+12);
 					//重新计算mx,my
@@ -122,9 +122,9 @@ void MonkeyMain(void) {
 					sprintf(s, "(%d, %d)", mx, my);
 					draw_box(_backbuf, btif->xs, 0, 0, 0, 320, 16);
 					put_str(_backbuf, btif->xs, 0, 0, 7, s);
-					sctrler_refresh(scr, sht_back, 0, 0, 320, 16);
-					sctrler_refresh(scr, sht_ms, 0, 16, 80, 16);
-					sctrler_slide(scr, sht_ms, mx, my);
+					sheet_refresh(sht_back, 0, 0, 320, 16);
+					sheet_refresh(sht_ms, 0, 16, 80, 16);
+					sheet_slide(sht_ms, mx, my);
 				}
 			}
 		}
