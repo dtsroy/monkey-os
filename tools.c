@@ -23,3 +23,13 @@ unsigned char test486(void) {
 	io_save_eflags(ef);
 	return is486;
 }
+
+struct textinfo packText(char *text, int bg, int fg, int len) {
+	struct textinfo ret;
+	ret.text = text;
+	ret.bg = bg;
+	ret.fg = fg;
+	ret.len = len;
+	return ret;
+}
+

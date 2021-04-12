@@ -203,3 +203,9 @@ void sheet_free(struct sheet *sht) {
 	}
 	sht->flag = 0;
 }
+
+void sheet_put_str(struct sheet *xmain, int x, int y, int bg, int fg, char *text, int len) {
+	draw_box(xmain->buf, xmain->bxs, bg, x, y, x + len * 8, y + 16);
+	put_str(xmain->buf, xmain->bxs, x, y, fg, text);
+	sheet_refresh(xmain, x, y, x + len * 8, y + 16);
+}

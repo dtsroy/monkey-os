@@ -45,6 +45,13 @@ void put_font(unsigned char *vram, int xsize, int x, int y, char color, unsigned
 void fin(void);
 unsigned char test486(void);
 
+struct textinfo {
+	char *text;
+	int bg, fg;
+	int len;
+};
+struct textinfo packText(char *text, int bg, int fg, int len);
+
 //init_dt.c
 struct SEGMENT_DESCRIPTOR {
 	short limit_low, base_low;
@@ -166,15 +173,26 @@ void sheet_setbuf(struct sheet *xmain, unsigned char *buf, int xs, int ys, int c
 void sheet_setheight(struct sheet *sht, int height);
 void sheet_free(struct sheet *sht);
 void sheet_slide(struct sheet *sht, int vx0, int vy0);
+void sheet_put_str(struct sheet *xmain, int x, int y, int bg, int fg, char *text, int len);
 
 //window.c
 struct mwindow {
 	char *title;
-	unsigned char *buf;
+	struct sheet *sht;
 	int xs, ys;
 };
 
-struct mwindow *init_mwindow(char *title, unsigned char *buf, int xs, int ys);
+struct mwindow *init_mwindow(char *title, struct sheet *sht, int xs, int ys);
 void mwindow_draw(struct mwindow *xmain);
+
+struct mwindow_Label {
+	struct mwindow *mw;
+	int x, y;
+	char *text;
+	int bg, fg, len;
+};
+
+void mwindow_Label_new(struct mwindow_Label *ret, struct mwindow *mw, int x, int y, char *text, int bg, int fg, int len);
+void mwindow_Label_draw(struct mwindow_Label *xmain);
 
 #endif
