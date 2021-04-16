@@ -97,12 +97,10 @@ void MonkeyMain(void) {
 			// if (i==3)
 			// sheet_put_str(sht_back, 0, 48, 0, 7, s, 20);
 			io_sti();
-			if (i == 900) {
-				sheet_put_str(sht_back, 0, 112, 0, 7, "3s!", 3);
-			} else if (256 <= i && i <= 511) {
+			if (256 <= i && i <= 511) {
 				sprintf(s, "%02X", i - K_DT0);
 				sheet_put_str(sht_back, 0, 16, 0, 7, s, 2);
-			} else if (512 <= i <= 767) {
+			} else if (512 <= i && i <= 767) {
 				if (i == 900){
 					sheet_put_str(sht_back, 0, 80, 0, 7, "in ms!", 5);
 				}
@@ -145,6 +143,8 @@ void MonkeyMain(void) {
 					sheet_refresh(sht_ms, 0, 16, 80, 16);
 					sheet_slide(sht_ms, mx, my);
 				}
+			} else if (i == 900) {
+				sheet_put_str(sht_back, 0, 112, 0, 7, "3s!", 3);
 			}
 		}
 	}
