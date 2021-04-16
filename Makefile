@@ -4,7 +4,7 @@ INCPATH  = ../z_tools/haribote/
 OBJS_MP = mkpack.obj func.obj graphic.obj \
 			tools.obj font.obj init_dt.obj int.obj \
 			fifo.obj keyboard_and_mouse.obj memory.obj \
-			sheet.obj window.obj
+			sheet.obj window.obj timer.obj
 
 DEL = .\\del.bat
 COPY = .\\copy.bat

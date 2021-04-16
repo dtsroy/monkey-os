@@ -24,6 +24,7 @@ void init_gdtidt(void)
 	set_gatedesc(idt + 0x21, (int) ihr21x, 2 * 8, AR_INTGATE32);//键盘中断
 	set_gatedesc(idt + 0x27, (int) ihr27x, 2 * 8, AR_INTGATE32);//...
 	set_gatedesc(idt + 0x2c, (int) ihr2cx, 2 * 8, AR_INTGATE32);//鼠标中断
+	set_gatedesc(idt + 0x20, (int) ihr20x, 2 * 8, AR_INTGATE32);//PIT中断
 
 
 	return;

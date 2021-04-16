@@ -1,6 +1,8 @@
 #include "mkpack.h"
 
 extern struct fifo xmainfifobuf;
+extern struct tctrler tcr;
+extern struct sheet *sht_back;
 
 void init_pic(void) {
 	io_outp8(PIC0_IMR, 0xff); //主PIC屏蔽所有中断
@@ -38,4 +40,28 @@ void ihr2c(int *esp) { //鼠标中断
 	io_outp8(PIC0_OCW, 0x62); //受理完毕
 	dat = io_inp8(P_KEYDAT);
 	fifo_put(&xmainfifobuf, dat + M_DT0);
+}
+
+void ihr20(int *esp) {
+	struct timer *timer;
+	io_outp8(PIC0_OCW, 0x60); /* 把IRQ-00接收信号结束的信息通知给PIC */
+	tcr.count++;
+	if (tcr.next > tcr.count) {
+		return;
+	}
+	timer = tcr.t0; /* 首先把最前面的地址赋给timer */
+	for (;;) {
+	/* 因为timers的定时器都处于运行状态，所以不确认flags */
+		if (timer->timeout > tcr.count) {
+			break;
+		}
+		/* 超时 */
+		sheet_put_str(sht_back, 0, 96, 0, 7, "timeout!!!", 10);
+		timer->flags = TIMER_F_ALLOC;
+		fifo_put(timer->fifobuf, timer->data);
+		timer = timer->next; /* 将下一个定时器的地址赋给timer*/
+	}
+	tcr.t0 = timer;
+	tcr.next = timer->timeout;
+	return;
 }

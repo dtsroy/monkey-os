@@ -1,6 +1,8 @@
 #include "mkpack.h"
 
 struct fifo xmainfifobuf;
+struct tctrler tcr;
+struct sheet *sht_back;
 
 void MonkeyMain(void) {
 	struct BootInfo *btif = (struct BootInfo*) 0x0ff0;
@@ -14,7 +16,8 @@ void MonkeyMain(void) {
 	init_pic();
 	io_sti(); //初始化完成,放开cpu中断标志
 
-	io_outp8(PIC0_IMR, 0xf9); //放开键盘 && PIC1 11111001
+	init_pit();
+	io_outp8(PIC0_IMR, 0xf8); //放开键盘 && PIC1 PIT 11111000
 	io_outp8(PIC1_IMR, 0xef); //放开鼠标 11101111
 	
 	//键鼠初始化
@@ -22,6 +25,12 @@ void MonkeyMain(void) {
 	init_keyboard();
 	init_mouse();
 	mouse_decoder.st = 0;
+
+	//时钟测试
+	struct timer *t1;
+	t1 = timer_alloc();
+	timer_init(t1, &xmainfifobuf, 900);
+	timer_set(t1, 300);
 
 	//内存管理初始化
 	struct mctrler *mcr = (struct mctrler *)MCTRLER_ADDR;
@@ -37,7 +46,7 @@ void MonkeyMain(void) {
 	
 	//图层相关
 	struct sctrler *scr;
-	struct sheet *sht_ms, *sht_back;
+	struct sheet *sht_ms;
 	struct sheet *sht_tw;
 	int mx = (btif->xs - 12) / 2;
 	int my = (btif->ys - 12 - 14) / 2;
@@ -73,7 +82,7 @@ void MonkeyMain(void) {
 	// struct mwindow_Label *tl;
 	// mwindow_Label_new(tl, tw, 0, 0, "hhh", 0, 7, 3);
 	// mwindow_Label_draw(tl);
-	sheet_put_str(tw->sht, 0, 0, 0, 7, "gfdgfs", 6);
+	sheet_put_str(tw->sht, 0, 16, 16, 7, "gfdgfs", 6);
 
 	sprintf(s, "memory %dMB, free:%dkb", memtotal / (1024*1024), mctrler_total(mcr) / 1024);
 	sheet_put_str(sht_back, 0, 32, 0, 7, s, 30);
@@ -84,11 +93,19 @@ void MonkeyMain(void) {
 			io_sti();
 		}else {
 			i = fifo_get(&xmainfifobuf);
+			// sprintf(s, "i is: %d", i);
+			// if (i==3)
+			// sheet_put_str(sht_back, 0, 48, 0, 7, s, 20);
 			io_sti();
-			if (256 <= i && i <= 511) {
+			if (i == 900) {
+				sheet_put_str(sht_back, 0, 112, 0, 7, "3s!", 3);
+			} else if (256 <= i && i <= 511) {
 				sprintf(s, "%02X", i - K_DT0);
 				sheet_put_str(sht_back, 0, 16, 0, 7, s, 2);
-			}else if (512 <= i <= 767) {
+			} else if (512 <= i <= 767) {
+				if (i == 900){
+					sheet_put_str(sht_back, 0, 80, 0, 7, "in ms!", 5);
+				}
 				if (mdecode(&mouse_decoder, i - M_DT0) != 0) {
 					//解析成功
 					sprintf(s, "mouse:[lcr %d %d]", mouse_decoder.x, mouse_decoder.y);

@@ -38,18 +38,3 @@ void mwindow_draw(struct mwindow *xmain) {
 		}
 	}
 }
-
-void mwindow_Label_new(struct mwindow_Label *ret, struct mwindow *mw, int x, int y, char *text, int bg, int fg, int len) {
-	// struct mwindow_Label *ret;
-	ret->mw = mw;
-	ret->text = text;
-	ret->x = x;
-	ret->y = y;
-	ret->bg = bg;
-	ret->fg = fg;
-	ret->len = len;
-}
-
-void mwindow_Label_draw(struct mwindow_Label *xmain) {
-	sheet_put_str(xmain->mw->sht, xmain->x, xmain->y, xmain->bg, xmain->fg, xmain->text, xmain->len);
-}

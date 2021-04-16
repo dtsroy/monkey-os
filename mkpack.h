@@ -21,6 +21,7 @@ void load_idtr(int limit, int addr);
 void ihr21x(void);
 void ihr27x(void);
 void ihr2cx(void);
+void ihr20x(void);
 void io_sti(void);
 void io_shlt(void);
 int io_inp8(int port);
@@ -95,6 +96,7 @@ void init_pic(void);
 void ihr21(int *esp);
 void ihr27(int *esp);
 void ihr2c(int *esp);
+void ihr20(int *esp);
 
 //fifo.c
 struct fifo {
@@ -185,14 +187,29 @@ struct mwindow {
 struct mwindow *init_mwindow(char *title, struct sheet *sht, int xs, int ys);
 void mwindow_draw(struct mwindow *xmain);
 
-struct mwindow_Label {
-	struct mwindow *mw;
-	int x, y;
-	char *text;
-	int bg, fg, len;
+//timer.c
+#define TIMER_F_ALLOC 1
+#define TIMER_F_USING 2
+
+#define PIT_CTRL	0x0043
+#define PIT_CNT0	0x0040
+struct timer {
+	struct timer *next;
+	unsigned int timeout, flags;
+	struct fifo *fifobuf;
+	int data;
+};
+#define MAX_TIMERS 500
+struct tctrler {
+	unsigned int count, next;
+	struct timer *t0;
+	struct timer timers[MAX_TIMERS];
 };
 
-void mwindow_Label_new(struct mwindow_Label *ret, struct mwindow *mw, int x, int y, char *text, int bg, int fg, int len);
-void mwindow_Label_draw(struct mwindow_Label *xmain);
+void init_pit(void);
+struct timer *timer_alloc(void);
+void timer_free(struct timer *timer);
+void timer_init(struct timer *timer, struct fifo *_fifo, int data);
+void timer_set(struct timer *_timer, unsigned int timeout);
 
 #endif
