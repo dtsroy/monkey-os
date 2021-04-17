@@ -4,6 +4,24 @@ struct fifo xmainfifobuf;
 struct tctrler tcr;
 struct sheet *sht_back;
 
+static char KEYDATA_SHIFT[84] = { //按下shift
+	0, 0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 0, 0,
+	'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', 0, 0, 'A', 'S',
+	'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~', 0, '|', 'Z', 'X', 'C', 'V',
+	'B', 'N', 'M', '<', '>', '?', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0
+};
+
+static char KEYDATA_UNSHIFT[84] = { //没按下shift
+	0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 0, 0,
+	'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', 0, 0, 'a', 's',
+	'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\', 'z', 'x', 'c', 'v',
+	'b', 'n', 'm', ',', '.', '/', 0, 0, 0, ' ', 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0
+};
+
 void MonkeyMain(void) {
 	struct BootInfo *btif = (struct BootInfo*) 0x0ff0;
 	char *s;
@@ -25,17 +43,24 @@ void MonkeyMain(void) {
 	init_keyboard();
 	init_mouse();
 	mouse_decoder.st = 0;
+	unsigned char p_shift=0; //按下shift?
+	char *nowkeydata=KEYDATA_SHIFT;
 
 	//时钟测试
-	struct timer *t1;
+	struct timer *t1; //3秒测试
 	t1 = timer_alloc();
 	timer_init(t1, 3);
 	timer_set(t1, 300);
 
-	struct timer *t2;
+	struct timer *t2; //5s
 	t2 = timer_alloc();
 	timer_init(t2, 5);
 	timer_set(t2, 500);
+
+	struct timer *cur_timer; //光标定时器
+	cur_timer = timer_alloc();
+	timer_init(cur_timer, 0);
+	timer_set(cur_timer, 50); //0.5s
 
 	//内存管理初始化
 	struct mctrler *mcr = (struct mctrler *)MCTRLER_ADDR;
@@ -75,38 +100,68 @@ void MonkeyMain(void) {
 	sheet_setheight(sht_ms, 2);
 
 	//窗口测试
-	testwinbuf = mctrler_allocx(mcr, 300*300);
+	int wxs=144, wys=32;
+	testwinbuf = mctrler_allocx(mcr, wxs*wys);
 	sht_tw = sctrler_alloc(scr);
-	struct mwindow *tw = init_mwindow("_test!", sht_tw, 300, 300);
-	sheet_setbuf(sht_tw, testwinbuf, 300, 300, 6);
+	
+	struct mwindow *tw = init_mwindow("_test!`~'", sht_tw, wxs, wys);
+	sheet_setbuf(sht_tw, testwinbuf, wxs, wys, 6);
 	mwindow_draw(tw);
 	sheet_setheight(sht_tw, 1);
-	sheet_slide(sht_tw, 200, 200);
-
-	// struct textinfo x = packText("hhh", 0, 7, 3);
-	// struct mwindow_Label *tl;
-	// mwindow_Label_new(tl, tw, 0, 0, "hhh", 0, 7, 3);
-	// mwindow_Label_draw(tl);
-	sheet_put_str(tw->sht, 0, 16, 16, 7, "gfdgfs", 6);
+	int twx=200, twy=200;
+	sheet_slide(sht_tw, twx, twy);
 
 	sprintf(s, "memory %dMB, free:%dkb", memtotal / (1024*1024), mctrler_total(mcr) / 1024);
 	sheet_put_str(sht_back, 0, 32, 0, 7, s, 30);
 
-	unsigned int count=0;
+	int cur_x=0;
+	int nowcur_color=16;
+	// unsigned int count=0;
 	for (;;) {
-		count++;
+		// count++;
 		io_cli();
 		if (fifo_sts(&xmainfifobuf) == 0) {
-			io_sti();
+			io_shlt();
 		}else {
 			i = fifo_get(&xmainfifobuf);
-			// sprintf(s, "i is: %d", i);
+			sprintf(s, "i is: %4d", i);
 			// if (i==3)
-			// sheet_put_str(sht_back, 0, 48, 0, 7, s, 20);
+			sheet_put_str(sht_back, 0, 48, 0, 7, s, 20);
 			io_sti();
 			if (256 <= i && i <= 511) {
-				sprintf(s, "%02X", i - K_DT0);
-				sheet_put_str(sht_back, 0, 16, 0, 7, s, 2);
+				i -= K_DT0;
+				sprintf(s, "in key: i %d", i);
+				sheet_put_str(sht_back, 0, 16, 0, 7, s, 20);
+				if (p_shift) {
+					nowkeydata = KEYDATA_SHIFT;
+				} else {
+					nowkeydata = KEYDATA_UNSHIFT;
+				}
+				if (i < 84) {
+					if (nowkeydata[i] != 0 && cur_x < 8*18) {
+						//最多18字符
+						s[0] = nowkeydata[i];
+						s[1] = 0;//字符串结尾
+						sheet_put_str(sht_tw, cur_x, 16, 16, 7, s, 1);
+						cur_x += 8;
+					}
+				}
+				if (i == 14 && cur_x > 0) {
+					//退格
+					sheet_put_str(sht_tw, cur_x, 16, 16, 7, " ", 1);
+					cur_x -= 8;
+				}
+				if (i == 54 || i == 42) {
+					//shift
+					p_shift = 1;
+				}
+				if (i == 170 || i == 182) {
+					//松开shift
+					// sheet_put_str(sht_back, 0, 96, 16, 7, "shift!", 10);
+					p_shift = 0;
+				}
+				draw_box(sht_tw->buf, sht_tw->bxs, nowcur_color, cur_x, 16, cur_x + 8, 32);
+				sheet_refresh(sht_tw, cur_x, 16, cur_x + 8, 32);
 			} else if (512 <= i && i <= 767) {
 
 				if (mdecode(&mouse_decoder, i - M_DT0) != 0) {
@@ -147,12 +202,25 @@ void MonkeyMain(void) {
 					// sheet_refresh(sht_ms, 0, 16, 80, 16);
 					sheet_slide(sht_ms, mx, my);
 				}
+				if (mouse_decoder.btn & 0x01 != 0) {
+					sheet_slide(sht_tw, mx, my);
+				}
 			} else if (i == 3) {
-				count = 0;
+				// count = 0;
 				sheet_put_str(sht_back, 0, 112, 0, 7, "3s!", 3);
 			} else if (i == 5) {
-				sprintf(s, "%d", count);
-				sheet_put_str(sht_tw, 0, 16, 16, 7, s, strlen(s));
+				sheet_put_str(sht_back, 0, 80, 16, 7, "5s!", 3);
+			} else if (i <= 1) {
+				if (i == 1) {
+					timer_init(cur_timer, 0);
+					nowcur_color = 7;
+				} else {
+					timer_init(cur_timer, 1);
+					nowcur_color = 16;
+				}
+				timer_set(cur_timer, 50); //重置
+				draw_box(sht_tw->buf, sht_tw->bxs, nowcur_color, cur_x, 16, cur_x + 8, 32);
+				sheet_refresh(sht_tw, cur_x, 16, cur_x + 8, 32);
 			}
 		}
 	}
