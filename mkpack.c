@@ -29,8 +29,13 @@ void MonkeyMain(void) {
 	//时钟测试
 	struct timer *t1;
 	t1 = timer_alloc();
-	timer_init(t1, &xmainfifobuf, 900);
+	timer_init(t1, 3);
 	timer_set(t1, 300);
+
+	struct timer *t2;
+	t2 = timer_alloc();
+	timer_init(t2, 5);
+	timer_set(t2, 500);
 
 	//内存管理初始化
 	struct mctrler *mcr = (struct mctrler *)MCTRLER_ADDR;
@@ -87,7 +92,9 @@ void MonkeyMain(void) {
 	sprintf(s, "memory %dMB, free:%dkb", memtotal / (1024*1024), mctrler_total(mcr) / 1024);
 	sheet_put_str(sht_back, 0, 32, 0, 7, s, 30);
 
+	unsigned int count=0;
 	for (;;) {
+		count++;
 		io_cli();
 		if (fifo_sts(&xmainfifobuf) == 0) {
 			io_sti();
@@ -101,14 +108,11 @@ void MonkeyMain(void) {
 				sprintf(s, "%02X", i - K_DT0);
 				sheet_put_str(sht_back, 0, 16, 0, 7, s, 2);
 			} else if (512 <= i && i <= 767) {
-				if (i == 900){
-					sheet_put_str(sht_back, 0, 80, 0, 7, "in ms!", 5);
-				}
+
 				if (mdecode(&mouse_decoder, i - M_DT0) != 0) {
 					//解析成功
 					sprintf(s, "mouse:[lcr %d %d]", mouse_decoder.x, mouse_decoder.y);
 					if ((mouse_decoder.btn & 0x01) != 0) {
-						// _shutdown();
 						s[7] = 'L';
 					}
 					if ((mouse_decoder.btn & 0x02) != 0) {
@@ -140,11 +144,15 @@ void MonkeyMain(void) {
 					draw_box(_backbuf, btif->xs, 0, 0, 0, 320, 16);
 					put_str(_backbuf, btif->xs, 0, 0, 7, s);
 					sheet_refresh(sht_back, 0, 0, 320, 16);
-					sheet_refresh(sht_ms, 0, 16, 80, 16);
+					// sheet_refresh(sht_ms, 0, 16, 80, 16);
 					sheet_slide(sht_ms, mx, my);
 				}
-			} else if (i == 900) {
+			} else if (i == 3) {
+				count = 0;
 				sheet_put_str(sht_back, 0, 112, 0, 7, "3s!", 3);
+			} else if (i == 5) {
+				sprintf(s, "%d", count);
+				sheet_put_str(sht_tw, 0, 16, 16, 7, s, strlen(s));
 			}
 		}
 	}

@@ -32,41 +32,40 @@ struct timer *timer_alloc(void) {
 	return 0; /* 没找到 */
 }
 
-void timer_free(struct timer *timer) {
-	timer->flags = 0; /* 未使用 */
-	return;
+void timer_free(struct timer *xmain) {
+	xmain->flags = 0;
 }
 
-void timer_init(struct timer *timer, struct fifo *_fifo, int data) {
-	timer->fifobuf = _fifo;
-	timer->data = data;
-	return;
+void timer_init(struct timer *xmain, int data) {
+	xmain->data = data;
 }
 
-void timer_set(struct timer *_timer, unsigned int timeout) {
-	int e;
+void timer_set(struct timer *xmain, unsigned int timeout) {
+	// int e;
 	struct timer *t, *s;
-	_timer->timeout = timeout + tcr.count;
-	_timer->flags = TIMER_F_USING;
-	e = io_load_eflags();
+	xmain->timeout = timeout + tcr.count;
+	xmain->flags = TIMER_F_USING;
+	// e = io_load_eflags();
 	io_cli();
 	t = tcr.t0;
-	if (_timer->timeout <= t->timeout) {
+	if (xmain->timeout <= t->timeout) {
 	/* 插入最前面的情况 */
-		tcr.t0 = _timer;
-		_timer->next = t; /* 下面是设定t */
-		tcr.next = _timer->timeout;
-		io_save_eflags(e);
+		tcr.t0 = xmain;
+		xmain->next = t; /* 下面是设定t */
+		tcr.next = xmain->timeout;
+		// io_save_eflags(e);
+		io_sti();
 		return;
 	}
 	for (;;) {
 		s = t;
 		t = t->next;
-		if (_timer->timeout <= t->timeout) {
+		if (xmain->timeout <= t->timeout) {
 		/* 插入s和t之间的情况 */
-			s->next = _timer; /* s下一个是timer */
-			_timer->next = t; /* timer的下一个是t */
-			io_save_eflags(e);
+			s->next = xmain; /* s下一个是timer */
+			xmain->next = t; /* timer的下一个是t */
+			// io_save_eflags(e);
+			io_sti();
 			return;
 		}
 	}

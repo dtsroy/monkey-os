@@ -6,8 +6,8 @@ OBJS_MP = mkpack.obj func.obj graphic.obj \
 			fifo.obj keyboard_and_mouse.obj memory.obj \
 			sheet.obj window.obj timer.obj
 
-DEL = .\\del.bat
-COPY = .\\copy.bat
+DEL = python bash.py del
+COPY = python bash.py copy
 
 make     = $(TOOLPATH)make.exe -r
 nask     = $(TOOLPATH)nask.exe
@@ -52,7 +52,7 @@ font.bin : font.txt Makefile
 font.obj : font.bin Makefile
 	bin2obj font.bin font.obj _xfont
 
-%.gas : %.c Makefile
+%.gas : %.c mkpack.h Makefile
 	$(cc1) -o $*.gas $*.c
 
 %.nas : %.gas Makefile

@@ -196,7 +196,6 @@ void mwindow_draw(struct mwindow *xmain);
 struct timer {
 	struct timer *next;
 	unsigned int timeout, flags;
-	struct fifo *fifobuf;
 	int data;
 };
 #define MAX_TIMERS 500
@@ -208,8 +207,8 @@ struct tctrler {
 
 void init_pit(void);
 struct timer *timer_alloc(void);
-void timer_free(struct timer *timer);
-void timer_init(struct timer *timer, struct fifo *_fifo, int data);
-void timer_set(struct timer *_timer, unsigned int timeout);
+void timer_free(struct timer *xmain);
+void timer_init(struct timer *xmain, int data);
+void timer_set(struct timer *xmain, unsigned int timeout);
 
 #endif

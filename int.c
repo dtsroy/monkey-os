@@ -56,9 +56,9 @@ void ihr20(int *esp) {
 			break;
 		}
 		/* 超时 */
-		sheet_put_str(sht_back, 0, 96, 0, 7, "timeout!!!", 10);
+		// sheet_put_str(sht_back, 0, 96, 0, 7, "timeout!!!", 10);
 		timer->flags = TIMER_F_ALLOC;
-		fifo_put(timer->fifobuf, timer->data);
+		fifo_put(&xmainfifobuf, timer->data);
 		timer = timer->next; /* 将下一个定时器的地址赋给timer*/
 	}
 	tcr.t0 = timer;
