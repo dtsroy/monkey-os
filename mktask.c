@@ -53,7 +53,7 @@ void task_switchx(void) {
 
 struct task *task_init(void) {
 	int i;
-	struct task *ret;
+	struct task *ret, *idle;
 	struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
 	tkcr = mctrler_allocx(sizeof(struct taskctrler));
 
@@ -76,6 +76,18 @@ struct task *task_init(void) {
 	load_tr(ret->sel);
 	task_timer = timer_alloc();
 	timer_set(task_timer, ret->priority);
+
+	idle = task_alloc();
+	idle->_tss.esp = mctrler_allocx(64*1024) + 64*1024;
+	idle->_tss.eip = (int) &fin;
+	idle->_tss.es = 8;
+	idle->_tss.cs = 16;
+	idle->_tss.ss = 8;
+	idle->_tss.ds = 8;
+	idle->_tss.fs = 8;
+	idle->_tss.gs = 8;
+	task_run(idle, MAX_TASKLEVELS-1, 1);
+
 	return ret;
 }
 
