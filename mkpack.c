@@ -189,8 +189,8 @@ void MonkeyMain(void) {
 			io_sti();
 			if (256 <= i && i <= 511) {
 				i -= K_DT0;
-				// sprintf(s, "in key: i %d", i);
-				// sheet_put_str(sht_back, 0, 16, 0, 7, s, 20);
+				sprintf(s, "in key: i %d", i);
+				sheet_put_str(sht_back, 0, 48, 0, 7, s, 20);
 				if (p_shift) {
 					nowkeydata = KEYDATA_SHIFT;
 				} else {
@@ -244,6 +244,8 @@ void MonkeyMain(void) {
 				draw_box(sht_tw->buf, sht_tw->bxs, nowcur_color, cur_x, 16, cur_x + 8, 32);
 				sheet_refresh(sht_tw, cur_x, 16, cur_x + 8, 32);
 			} else if (512 <= i && i <= 767) {
+				sprintf(s, "in ms: i %d", i);
+				sheet_put_str(sht_back, 0, 64, 0, 7, s, 20);
 				if (mdecode(&mouse_decoder, i - M_DT0) != 0) {
 					//解析成功
 					sprintf(s, "mouse:[lcr %d %d]", mouse_decoder.x, mouse_decoder.y);
