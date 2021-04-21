@@ -1,12 +1,13 @@
 #include "mkpack.h"
 
-void init_fifo(struct fifo *xmain, int size, unsigned int *buf) {
+void init_fifo(struct fifo *xmain, int size, unsigned int *buf, struct task *tk) {
 	xmain->sz = size;
 	xmain->wp = 0;
 	xmain->rp = 0;
 	xmain->free = size;
 	xmain->addr = buf;
 	xmain->flag = 0;
+	xmain->tk = tk;
 }
 
 int fifo_put(struct fifo *xmain, int dat) {
@@ -22,6 +23,12 @@ int fifo_put(struct fifo *xmain, int dat) {
 		xmain->wp = 0;
 	}
 	xmain->free--;
+	if (xmain->tk != 0) {
+		if (xmain->tk->flag != 2) {
+			//休眠中需唤醒
+			task_run(xmain->tk, -1, 0);
+		}
+	}
 	return 0;
 }
 

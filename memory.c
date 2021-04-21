@@ -1,5 +1,7 @@
 #include "mkpack.h"
 
+extern struct mctrler *mcr;
+
 unsigned int getmem(unsigned int start, unsigned int end) {
 	char is486 = test486();
 	unsigned int cr0, ret;
@@ -21,33 +23,33 @@ unsigned int getmem(unsigned int start, unsigned int end) {
 	return ret;
 }
 
-void init_mctrler(struct mctrler *xmain) {
-	xmain->frees = 0;
-	xmain->maxfrees = 0;
-	xmain->losts = 0;
-	xmain->lostsize = 0;
+void init_mctrler() {
+	mcr->frees = 0;
+	mcr->maxfrees = 0;
+	mcr->losts = 0;
+	mcr->lostsize = 0;
 }
 
-unsigned int mctrler_total(struct mctrler *xmain) {
+unsigned int mctrler_total() {
 	unsigned int ret = 0, it; //总计free
-	for (it = 0; it<xmain->frees; it++) {
-		ret += xmain->free[it].size;
+	for (it = 0; it<mcr->frees; it++) {
+		ret += mcr->free[it].size;
 	}
 	return ret;
 }
 
-unsigned int mctrler_alloc(struct mctrler *xmain, unsigned int size) {
+unsigned int mctrler_alloc(unsigned int size) {
 	unsigned int it, ret;
-	for (it = 0; it<xmain->frees; it++) {
-		if (xmain->free[it].size >= size) {
-			ret = xmain->free[it].addr;
-			xmain->free[it].addr += size; //起始地址后移
-			xmain->free[it].size -= size;
-			if (xmain->free[it].size == 0) {
+	for (it = 0; it<mcr->frees; it++) {
+		if (mcr->free[it].size >= size) {
+			ret = mcr->free[it].addr;
+			mcr->free[it].addr += size; //起始地址后移
+			mcr->free[it].size -= size;
+			if (mcr->free[it].size == 0) {
 				//已经保证>=0
-				xmain->frees--;
-				for (; it<xmain->frees; it++) {
-					xmain->free[it] = xmain->free[it+1]; //整体偏移
+				mcr->frees--;
+				for (; it<mcr->frees; it++) {
+					mcr->free[it] = mcr->free[it+1]; //整体偏移
 				}
 			}
 			return ret;
@@ -56,73 +58,73 @@ unsigned int mctrler_alloc(struct mctrler *xmain, unsigned int size) {
 	return 0;
 }
 
-int mctrler_free(struct mctrler *xmain, unsigned int addr, unsigned int size) {
+int mctrler_free(unsigned int addr, unsigned int size) {
 	int i, j;
 	//决定插入索引
-	for (i=0; i<xmain->frees; i++) {
-		if (xmain->free[i].addr > addr) {
+	for (i=0; i<mcr->frees; i++) {
+		if (mcr->free[i].addr > addr) {
 			break;
 		}
 	}
 	//i-1 的addr < addr < i 的addr
 	if (i > 0) {
 		//前面有可用
-		if (xmain->free[i-1].addr + xmain->free[i-1].size == addr) {
+		if (mcr->free[i-1].addr + mcr->free[i-1].size == addr) {
 			//与前面归纳
-			xmain->free[i-1].size += size;
-			if (i<xmain->frees) {
-				if (addr + size == xmain->free[i].addr) {
+			mcr->free[i-1].size += size;
+			if (i<mcr->frees) {
+				if (addr + size == mcr->free[i].addr) {
 					//与后面归纳
-					xmain->free[i-1].size += xmain->free[i].size;
-					xmain->frees--;
+					mcr->free[i-1].size += mcr->free[i].size;
+					mcr->frees--;
 					//整体位移
-					for (; i<xmain->frees; i++) {
-						xmain->free[i] = xmain->free[i+1];
+					for (; i<mcr->frees; i++) {
+						mcr->free[i] = mcr->free[i+1];
 					}
 				}
 			}
 			return 0;
 		}
 	}
-	if (i < xmain->frees) {
+	if (i < mcr->frees) {
 		//不是最后一个
-		if (addr + size == xmain->free[i].addr) {
+		if (addr + size == mcr->free[i].addr) {
 			//与后面归纳
-			xmain->free[i].addr = addr;
-			xmain->free[i].size += size;
+			mcr->free[i].addr = addr;
+			mcr->free[i].size += size;
 			return 0;
 		}
 	}
-	if (xmain->frees < MCTRLER_MAX_FREES) {
-		for (j = xmain->frees; j>i; j--) {
+	if (mcr->frees < MCTRLER_MAX_FREES) {
+		for (j = mcr->frees; j>i; j--) {
 			// 整体后移
-			xmain->free[i] = xmain->free[j-1];
+			mcr->free[i] = mcr->free[j-1];
 		}
-		xmain->frees++;
-		if (xmain->frees > xmain->maxfrees) {
+		mcr->frees++;
+		if (mcr->frees > mcr->maxfrees) {
 			//更新最大值
-			xmain->maxfrees = xmain->frees;
+			mcr->maxfrees = mcr->frees;
 		}
-		xmain->free[i].addr = addr;
-		xmain->free[i].size = size;
+		mcr->free[i].addr = addr;
+		mcr->free[i].size = size;
 		return 0;
 	}
 	//还是不行,舍去
-	xmain->losts++;
-	xmain->lostsize += size;
+	mcr->losts++;
+	mcr->lostsize += size;
 	return -1;
 }
 
-unsigned int mctrler_allocx(struct mctrler *xmain, unsigned int size) {
+unsigned int mctrler_allocx(unsigned int size) {
 	unsigned int ret;
 	size = (size + 0xfff) & 0xfffff000;
-	ret = mctrler_alloc(xmain, size);
+	ret = mctrler_alloc(size);
 	return ret;
 }
 
-int mctrler_freex(struct mctrler *xmain, unsigned int addr, unsigned int size) {
+int mctrler_freex(unsigned int addr, unsigned int size) {
 	int ret;
 	size = (size + 0xfff) & 0xfffff000;
-	ret = mctrler_free(xmain, addr, size);
+	ret = mctrler_free(addr, size);
 	return ret;
 }

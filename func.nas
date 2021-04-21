@@ -10,6 +10,7 @@
 		GLOBAL _io_inp8, _io_shlt
 		GLOBAL _load_cr0, _save_cr0
 		GLOBAL _getmemx, __shutdown
+		GLOBAL _load_tr, _jmpfar
 
 		EXTERN _ihr21, _ihr27, _ihr2c, _ihr20
 
@@ -179,3 +180,11 @@ __shutdown:
 	MOV DX, 0x1004
 	OUT DX, AX
 	;RET
+
+_load_tr:
+	LTR [ESP+4]
+	RET
+
+_jmpfar:
+	JMP FAR [ESP+4]
+	RET

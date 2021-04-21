@@ -3,6 +3,7 @@
 extern struct fifo xmainfifobuf;
 extern struct tctrler tcr;
 extern struct sheet *sht_back;
+extern struct timer *task_timer;
 
 void init_pic(void) {
 	io_outp8(PIC0_IMR, 0xff); //主PIC屏蔽所有中断
@@ -44,6 +45,7 @@ void ihr2c(int *esp) { //鼠标中断
 
 void ihr20(int *esp) {
 	struct timer *timer;
+	unsigned char ts=0;
 	io_outp8(PIC0_OCW, 0x60); /* 把IRQ-00接收信号结束的信息通知给PIC */
 	tcr.count++;
 	if (tcr.next > tcr.count) {
@@ -58,10 +60,17 @@ void ihr20(int *esp) {
 		/* 超时 */
 		// sheet_put_str(sht_back, 0, 96, 0, 7, "timeout!!!", 10);
 		timer->flags = TIMER_F_ALLOC;
-		fifo_put(&xmainfifobuf, timer->data);
+		if (timer != task_timer) {
+			fifo_put(timer->fifobuf, timer->data);
+		} else {
+			ts = 1;
+		}
 		timer = timer->next; /* 将下一个定时器的地址赋给timer*/
 	}
 	tcr.t0 = timer;
 	tcr.next = timer->timeout;
+	if (ts != 0) {
+		task_switch();
+	}
 	return;
 }

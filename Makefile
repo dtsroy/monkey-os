@@ -4,14 +4,14 @@ INCPATH  = ../z_tools/haribote/
 OBJS_MP = mkpack.obj func.obj graphic.obj \
 			tools.obj font.obj init_dt.obj int.obj \
 			fifo.obj keyboard_and_mouse.obj memory.obj \
-			sheet.obj window.obj timer.obj
+			sheet.obj window.obj timer.obj mktask.obj
 
 DEL = python bash.py del
 COPY = python bash.py copy
 
 make     = $(TOOLPATH)make.exe -r
 nask     = $(TOOLPATH)nask.exe
-cc1      = $(TOOLPATH)cc1.exe -I$(INCPATH) -Os -Wall -quiet -std=c99
+cc1      = $(TOOLPATH)cc1.exe -I$(INCPATH) -Os -w -quiet -std=c99
 gas2nask = $(TOOLPATH)gas2nask.exe -a
 obj2bim  = $(TOOLPATH)obj2bim.exe
 bim2hrb  = $(TOOLPATH)bim2hrb.exe

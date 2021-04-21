@@ -36,8 +36,9 @@ void timer_free(struct timer *xmain) {
 	xmain->flags = 0;
 }
 
-void timer_init(struct timer *xmain, int data) {
+void timer_init(struct timer *xmain, struct fifo *fifobuf, int data) {
 	xmain->data = data;
+	xmain->fifobuf = fifobuf;
 }
 
 void timer_set(struct timer *xmain, unsigned int timeout) {

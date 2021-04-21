@@ -1,11 +1,11 @@
 #include "mkpack.h"
 
-struct sctrler *init_sctrler(struct mctrler *xmain, unsigned int vram, int xs, int ys) {
+struct sctrler *init_sctrler(unsigned int vram, int xs, int ys) {
 	struct sctrler *ret;
 	int i;
-	ret = (struct sctrler *) mctrler_allocx(xmain, sizeof(struct sctrler));
+	ret = (struct sctrler *) mctrler_allocx(sizeof(struct sctrler));
 	if (ret == 0) {goto err;}
-	ret->map = (unsigned char *) mctrler_allocx(xmain, xs * ys);
+	ret->map = (unsigned char *) mctrler_allocx(xs * ys);
 	if (ret->map == 0) {goto err;}
 	ret->vram = vram;
 	ret->xs = xs;

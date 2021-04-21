@@ -29,6 +29,8 @@ int load_cr0(void);
 void save_cr0(int cr0);
 int getmemx(int start, int end);
 void _shutdown(void);
+void load_tr(int tr);
+void jmpfar(int eip, int cs);
 
 //graghic.c
 void init_palette(void);
@@ -74,6 +76,7 @@ struct GATE_DESCRIPTOR {
 #define LIMIT_BOTPAK	0x0007ffff
 #define AR_DATA32_RW	0x4092
 #define AR_CODE32_ER	0x409a
+#define AR_TSS32		0x0089
 #define AR_INTGATE32	0x008e
 void init_gdtidt(void);
 void set_segmdesc(struct SEGMENT_DESCRIPTOR *sd, unsigned int limit, int base, int ar);
@@ -102,9 +105,10 @@ void ihr20(int *esp);
 struct fifo {
 	int *addr; //缓冲区地址
 	int wp, rp, sz, free, flag; //写入指针,读取指针,大小,空余,是否溢出(0, -1)
+	struct task *tk;
 };
 
-void init_fifo(struct fifo *xmain, int size, unsigned int *buf);
+void init_fifo(struct fifo *xmain, int size, unsigned int *buf, struct task *tk);
 int fifo_put(struct fifo *xmain, int dat);
 int fifo_get(struct fifo *xmain);
 int fifo_sts(struct fifo *xmain);
@@ -143,12 +147,12 @@ struct mctrler {
 
 
 #define CR0_CACHE_DISABLE 0x60000000
-void init_mctrler(struct mctrler *xmain);
-unsigned int mctrler_total(struct mctrler *xmain);
-unsigned int mctrler_alloc(struct mctrler *xmain, unsigned int size);
-int mctrler_free(struct mctrler *xmain, unsigned int addr, unsigned int size);
-unsigned int mctrler_allocx(struct mctrler *xmain, unsigned int size);
-int mctrler_freex(struct mctrler *xmain, unsigned int addr, unsigned int size);
+void init_mctrler(void);
+unsigned int mctrler_total(void);
+unsigned int mctrler_alloc(unsigned int size);
+int mctrler_free(unsigned int addr, unsigned int size);
+unsigned int mctrler_allocx(unsigned int size);
+int mctrler_freex(unsigned int addr, unsigned int size);
 
 //sheet.c
 #define MAX_SHEETS 256
@@ -164,7 +168,7 @@ struct sctrler {
 	struct sheet shts0[MAX_SHEETS];
 };
 
-struct sctrler *init_sctrler(struct mctrler *xmain, unsigned int vram, int xs, int ys);
+struct sctrler *init_sctrler(unsigned int vram, int xs, int ys);
 struct sheet *sctrler_alloc(struct sctrler *xmain);
 
 void sctrler_refreshx(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1, int h0, int h1);
@@ -196,6 +200,7 @@ void mwindow_draw(struct mwindow *xmain);
 struct timer {
 	struct timer *next;
 	unsigned int timeout, flags;
+	struct fifo *fifobuf;
 	int data;
 };
 #define MAX_TIMERS 500
@@ -208,7 +213,47 @@ struct tctrler {
 void init_pit(void);
 struct timer *timer_alloc(void);
 void timer_free(struct timer *xmain);
-void timer_init(struct timer *xmain, int data);
+void timer_init(struct timer *xmain, struct fifo *fifobuf, int data);
 void timer_set(struct timer *xmain, unsigned int timeout);
+
+//mktask.c
+#define MAX_TASKS 1000	/*最大任务数量*/
+#define TASK_GDT0 3 //gdt 分配的初始值
+#define MAX_TASKS_LV 100 //每个level最多几个task
+#define MAX_TASKLEVELS 10 // 最多几个level
+
+struct tss {
+	int backlink, esp0, ss0, esp1, ss1, esp2, ss2, cr3;
+	int eip, eflags, eax, ecx, edx, ebx, esp, ebp, esi, edi;
+	int es, cs, ss, ds, fs, gs;
+	int ldtr, iomap;
+};
+
+struct task {
+	int sel, flag; //sel->GDT
+	int level, priority; //优先
+	struct tss _tss;
+};
+
+struct task_level {
+	int running, now; //正在运行多少个  当前运行哪个
+	struct task *tasks[MAX_TASKS_LV];
+};
+
+struct taskctrler {
+	int nl; //活动中level
+	unsigned char clv; //下次是否更改level
+	struct task_level levels[MAX_TASKLEVELS];
+	struct task tk0[MAX_TASKS];
+};
+struct task *task_now(void);
+void task_add(struct task *xmain);
+void task_remove(struct task *xmain);
+void task_switchx(void);
+struct task *task_init(void);
+struct task *task_alloc(void);
+void task_run(struct task *xmain, int level, int priority);
+void task_switch(void);
+void task_sleep(struct task *xmain);
 
 #endif
