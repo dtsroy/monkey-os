@@ -125,8 +125,9 @@ int fifo_sts(struct fifo *xmain);
 #define K_DT0 256
 #define M_DT0 512
 struct mdec {
-	unsigned char buf[3], st;
+	unsigned char buf[4], st;
 	int x, y, btn;
+	signed int z;
 };
 
 void wait_kr(void);

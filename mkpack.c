@@ -47,6 +47,16 @@ void MonkeyMain(void) {
 	io_outp8(PIC0_IMR, 0xf8); //放开键盘 && PIC1 PIT 11111000
 	io_outp8(PIC1_IMR, 0xef); //放开鼠标 11101111
 	
+	//内存管理初始化
+	mcr = (struct mctrler *)MCTRLER_ADDR;
+
+	unsigned int memtotal = getmem(0x400000, 0xfffffffff);
+	init_mctrler();
+	mctrler_free(0x1000, 0x9e000);
+	mctrler_free(0x400000, memtotal - 0x400000);
+
+	scr = init_sctrler(btif->vram, btif->xs, btif->ys);
+
 	//键鼠初始化
 	struct mdec mouse_decoder;
 	init_keyboard();
@@ -55,14 +65,6 @@ void MonkeyMain(void) {
 	unsigned char p_shift=0; //按下shift?
 	char *nowkeydata=KEYDATA_SHIFT;
 	unsigned char p_capslock=0; //capslock打开(大写)
-
-	//内存管理初始化
-	mcr = (struct mctrler *)MCTRLER_ADDR;
-
-	unsigned int memtotal = getmem(0x400000, 0xfffffffff);
-	init_mctrler();
-	mctrler_free(0x1000, 0x9e000);
-	mctrler_free(0x400000, memtotal - 0x400000);
 
 	//多任务临时测试
 	struct task *tka, *tkbl[3];
@@ -87,8 +89,6 @@ void MonkeyMain(void) {
 	int mx = (btif->xs - 12) / 2;
 	int my = (btif->ys - 12 - 14) / 2;
 
-	scr = init_sctrler(btif->vram, btif->xs, btif->ys);
-
 	sht_back = sctrler_alloc(scr);
 	sht_ms = sctrler_alloc(scr);
 	_backbuf = (unsigned char *) mctrler_allocx(btif->xs * btif->ys);
@@ -101,10 +101,7 @@ void MonkeyMain(void) {
 	init_pointer(_mscur, 99);
 
 	sheet_slide(sht_back, 0, 0);
-	
 	sheet_slide(sht_ms, mx, my);
-	// sheet_setheight(sht_back, 0);
-	// sheet_setheight(sht_ms, 2);
 
 	//窗口测试
 	int wxs=144, wys=32;
@@ -166,7 +163,7 @@ void MonkeyMain(void) {
 
 	sheet_setheight(sht_back, 0);
 
-	sheet_slide(sht_win_b, 0, 123);
+	sheet_slide(sht_win_b, 0, 200);
 	sheet_setheight(sht_win_b, 1);
 
 	sheet_slide(sht_win_b2, 0, 246);
@@ -248,7 +245,7 @@ void MonkeyMain(void) {
 				sheet_put_str(sht_back, 0, 64, 0, 7, s, 20);
 				if (mdecode(&mouse_decoder, i - M_DT0) != 0) {
 					//解析成功
-					sprintf(s, "mouse:[lcr %d %d]", mouse_decoder.x, mouse_decoder.y);
+					sprintf(s, "mouse:[lcr %d %d] mid:%d", mouse_decoder.x, mouse_decoder.y, mouse_decoder.z);
 					if ((mouse_decoder.btn & 0x01) != 0) {
 						s[7] = 'L';
 					}
@@ -258,7 +255,7 @@ void MonkeyMain(void) {
 					if ((mouse_decoder.btn & 0x04) != 0) {
 						s[8] = 'C';
 					}
-					sheet_put_str(sht_back, 24, 16, 0, 7, s, 20);
+					sheet_put_str(sht_back, 24, 16, 0, 7, s, 25);
 					//隐藏鼠标
 					//draw_box(_backbuf, btif->xs, 10, mx, my, mx+12, my+12);
 					//重新计算mx,my

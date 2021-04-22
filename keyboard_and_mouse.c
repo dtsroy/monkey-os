@@ -24,6 +24,32 @@ void init_mouse(void) {
 	io_outp8(P_KEYCMD, KEYCMD_SENDTO_MOUSE);
 	wait_kr();
 	io_outp8(P_KEYDAT, MOUSECMD_ENABLE);
+
+	//下面激活滚轮
+	wait_kr();
+	io_outp8(P_KEYCMD, KEYCMD_SENDTO_MOUSE);
+	wait_kr();
+	io_outp8(P_KEYDAT, 0xf3); //设置采样率命令
+	wait_kr();
+	io_outp8(P_KEYCMD, KEYCMD_SENDTO_MOUSE);
+	wait_kr();
+	io_outp8(P_KEYDAT, 200); //魔术序列:0
+	wait_kr();
+	io_outp8(P_KEYCMD, KEYCMD_SENDTO_MOUSE);
+	wait_kr();
+	io_outp8(P_KEYDAT, 0xf3); //设置采样率命令
+	wait_kr();
+	io_outp8(P_KEYCMD, KEYCMD_SENDTO_MOUSE);
+	wait_kr();
+	io_outp8(P_KEYDAT, 100); //魔术序列:1
+	wait_kr();
+	io_outp8(P_KEYCMD, KEYCMD_SENDTO_MOUSE);
+	wait_kr();
+	io_outp8(P_KEYDAT, 0xf3); //设置采样率命令
+	wait_kr();
+	io_outp8(P_KEYCMD, KEYCMD_SENDTO_MOUSE);
+	wait_kr();
+	io_outp8(P_KEYDAT, 80); //魔术序列:2
 }
 
 int mdecode(struct mdec *xmain, unsigned char *dat) {
@@ -31,7 +57,7 @@ int mdecode(struct mdec *xmain, unsigned char *dat) {
 	switch (xmain->st) {
 		case 0:
 			if (dat == 0xfa) {
-				xmain->st = 1;
+				xmain->st = 3; //添加滚轮后防止数据错位
 			}
 			return 0;
 		case 1:
@@ -61,6 +87,29 @@ int mdecode(struct mdec *xmain, unsigned char *dat) {
 				xmain->y |= 0xffffff00;
 			}
 			xmain->y = -xmain->y;
+			xmain->st = 4;
+			return 0;
+		case 4:
+			sprintf(s, "dat3:%04d", dat);
+			sheet_put_str(sht_back, 0, 128, 16, 7, s, 10);
+			xmain->buf[3] = dat;
+			signed int tmp = (int)dat;
+			tmp &= 0xf;
+			switch (tmp) {
+				case 0x00:
+					//无滚动
+					xmain->z = 0;
+					break;
+				case 0x01:
+					//向上
+					xmain->z = 1;
+					break;
+				case 0x0f:
+					//向下
+					xmain->z = -1;
+					break;
+			}
+			xmain->st = 1;
 			return 1;
 	}
 	return -1; //不能到这里,但还是保障一下
