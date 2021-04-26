@@ -1,7 +1,7 @@
 #include "mkpack.h"
 
 extern struct fifo xmainfifobuf;
-extern struct tctrler tcr;
+extern struct tctrler *tcr;
 extern struct sheet *sht_back;
 extern struct timer *task_timer;
 
@@ -47,14 +47,14 @@ void ihr20(int *esp) {
 	struct timer *timer;
 	unsigned char ts=0;
 	io_outp8(PIC0_OCW, 0x60); /* 把IRQ-00接收信号结束的信息通知给PIC */
-	tcr.count++;
-	if (tcr.next > tcr.count) {
+	tcr->count++;
+	if (tcr->next > tcr->count) {
 		return;
 	}
-	timer = tcr.t0; /* 首先把最前面的地址赋给timer */
+	timer = tcr->t0; /* 首先把最前面的地址赋给timer */
 	for (;;) {
 	/* 因为timers的定时器都处于运行状态，所以不确认flags */
-		if (timer->timeout > tcr.count) {
+		if (timer->timeout > tcr->count) {
 			break;
 		}
 		/* 超时 */
@@ -67,8 +67,8 @@ void ihr20(int *esp) {
 		}
 		timer = timer->next; /* 将下一个定时器的地址赋给timer*/
 	}
-	tcr.t0 = timer;
-	tcr.next = timer->timeout;
+	tcr->t0 = timer;
+	tcr->next = timer->timeout;
 	if (ts != 0) {
 		task_switch();
 	}

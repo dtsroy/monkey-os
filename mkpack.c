@@ -1,7 +1,7 @@
 #include "mkpack.h"
 
 struct fifo xmainfifobuf;
-struct tctrler tcr;
+struct tctrler *tcr;
 struct sheet *sht_back;
 struct taskctrler *tkcr;
 struct mctrler *mcr;
@@ -38,15 +38,8 @@ void MonkeyMain(void) {
 	unsigned int xmainfifobuf_buf[512];
 	init_fifo(&xmainfifobuf, 512, xmainfifobuf_buf, 0);
 
-	//GDT IDT PIC 初始化
 	init_gdtidt();
 	init_pic();
-	io_sti(); //初始化完成,放开cpu中断标志
-
-	init_pit();
-	io_outp8(PIC0_IMR, 0xf8); //放开键盘 && PIC1 PIT 11111000
-	io_outp8(PIC1_IMR, 0xef); //放开鼠标 11101111
-	
 	//内存管理初始化
 	mcr = (struct mctrler *)MCTRLER_ADDR;
 
@@ -55,6 +48,14 @@ void MonkeyMain(void) {
 	mctrler_free(0x1000, 0x9e000);
 	mctrler_free(0x400000, memtotal - 0x400000);
 
+	//GDT IDT PIC 初始化
+
+	io_sti(); //初始化完成,放开cpu中断标志
+
+	init_pit();
+	io_outp8(PIC0_IMR, 0xf8); //放开键盘 && PIC1 PIT 11111000
+	io_outp8(PIC1_IMR, 0xef); //放开鼠标 11101111
+	
 	scr = init_sctrler(btif->vram, btif->xs, btif->ys);
 
 	//键鼠初始化
