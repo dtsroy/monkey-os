@@ -159,7 +159,6 @@ int mctrler_freex(unsigned int addr, unsigned int size);
 #define MAX_SHEETS 256
 struct sheet {
 	unsigned char *buf;
-	struct sctrler *scr;
 	int bxs, bys, vx0, vy0, cliv, height, flag;
 };
 struct sctrler {
@@ -169,11 +168,11 @@ struct sctrler {
 	struct sheet shts0[MAX_SHEETS];
 };
 
-struct sctrler *init_sctrler(unsigned int vram, int xs, int ys);
-struct sheet *sctrler_alloc(struct sctrler *xmain);
+void init_sctrler(unsigned int vram, int xs, int ys);
+struct sheet *sctrler_alloc(void);
 
-void sctrler_refreshx(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1, int h0, int h1);
-void sctrler_refreshmap(struct sctrler *xmain, int vx0, int vy0, int vx1, int vy1, int h0);
+void sctrler_refreshx(int vx0, int vy0, int vx1, int vy1, int h0, int h1);
+void sctrler_refreshmap(int vx0, int vy0, int vx1, int vy1, int h0);
 
 void sheet_refresh(struct sheet *sht, int bx0, int by0, int bx1, int by1);
 void sheet_setbuf(struct sheet *xmain, unsigned char *buf, int xs, int ys, int cliv);

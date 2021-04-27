@@ -1,8 +1,13 @@
 #include "mkpack.h"
 
+void init_kernel(void);
+
 struct fifo xmainfifobuf;
+unsigned int memtotal;
+struct mdec mouse_decoder;
+struct BootInfo *btif;
+struct task *task_mainloop;
 struct tctrler *tcr;
-struct sheet *sht_back;
 struct taskctrler *tkcr;
 struct mctrler *mcr;
 struct sctrler *scr;
@@ -32,46 +37,17 @@ static char KEYDATA_UNSHIFT[84] = { //没按下shift
 };
 
 void MonkeyMain(void) {
-	struct BootInfo *btif = (struct BootInfo*) 0x0ff0;
 	char *s;
 	int i;
-	unsigned int xmainfifobuf_buf[512];
-	init_fifo(&xmainfifobuf, 512, xmainfifobuf_buf, 0);
-
-	init_gdtidt();
-	init_pic();
-	//内存管理初始化
-	mcr = (struct mctrler *)MCTRLER_ADDR;
-
-	unsigned int memtotal = getmem(0x400000, 0xfffffffff);
-	init_mctrler();
-	mctrler_free(0x1000, 0x9e000);
-	mctrler_free(0x400000, memtotal - 0x400000);
-
-	//GDT IDT PIC 初始化
-
-	io_sti(); //初始化完成,放开cpu中断标志
-
-	init_pit();
-	io_outp8(PIC0_IMR, 0xf8); //放开键盘 && PIC1 PIT 11111000
-	io_outp8(PIC1_IMR, 0xef); //放开鼠标 11101111
 	
-	scr = init_sctrler(btif->vram, btif->xs, btif->ys);
+	unsigned int xbuf[512];
+	init_fifo(&xmainfifobuf, 512, xbuf, 0);
 
-	//键鼠初始化
-	struct mdec mouse_decoder;
-	init_keyboard();
-	init_mouse();
-	mouse_decoder.st = 0;
+	init_kernel();
+
 	unsigned char p_shift=0; //按下shift?
 	char *nowkeydata=KEYDATA_SHIFT;
 	unsigned char p_capslock=0; //capslock打开(大写)
-
-	//多任务临时测试
-	struct task *tka, *tkbl[3];
-	tka = task_init();
-	xmainfifobuf.tk = tka;
-	task_run(tka, 1, 0);
 
 	//时钟测试
 	struct timer *cur_timer; //光标定时器
@@ -84,14 +60,14 @@ void MonkeyMain(void) {
 	char _mscur[12*12], *_backbuf, *testwinbuf;
 	
 	//图层相关
-	
+	struct sheet *sht_back;
 	struct sheet *sht_ms;
 	struct sheet *sht_tw;
 	int mx = (btif->xs - 12) / 2;
 	int my = (btif->ys - 12 - 14) / 2;
 
-	sht_back = sctrler_alloc(scr);
-	sht_ms = sctrler_alloc(scr);
+	sht_back = sctrler_alloc();
+	sht_ms = sctrler_alloc();
 	_backbuf = (unsigned char *) mctrler_allocx(btif->xs * btif->ys);
 	
 	sheet_setbuf(sht_back, _backbuf, btif->xs, btif->ys, -1);
@@ -107,7 +83,7 @@ void MonkeyMain(void) {
 	//窗口测试
 	int wxs=144, wys=32;
 	testwinbuf = mctrler_allocx(wxs*wys);
-	sht_tw = sctrler_alloc(scr);
+	sht_tw = sctrler_alloc();
 	
 	struct mwindow *tw = init_mwindow("_test!`~'", sht_tw, wxs, wys);
 	sheet_setbuf(sht_tw, testwinbuf, wxs, wys, 6);
@@ -128,7 +104,7 @@ void MonkeyMain(void) {
 	unsigned char *buf_b2;
 	struct mwindow *twwb2;
 
-	sht_win_b = sctrler_alloc(scr);
+	sht_win_b = sctrler_alloc();
 	twwb = init_mwindow("yb1", sht_win_b, 144, 32);
 	buf_b = mctrler_allocx(144*32);
 	sheet_setbuf(sht_win_b, buf_b, 144, 32, -1);
@@ -145,7 +121,7 @@ void MonkeyMain(void) {
 	// *((int *) (task_b->_tss.esp + 4)) = i;
 	task_run(task_b, 2, 1);
 
-	sht_win_b2 = sctrler_alloc(scr);
+	sht_win_b2 = sctrler_alloc();
 	twwb2 = init_mwindow("yb2", sht_win_b2, 144, 32);
 	buf_b2 = mctrler_allocx(144*32);
 	sheet_setbuf(sht_win_b2, buf_b2, 144, 32, -1);
@@ -172,13 +148,13 @@ void MonkeyMain(void) {
 
 	sheet_setheight(sht_tw, 4);
 	sheet_setheight(sht_ms, 5);
-	sprintf(s, "memory %dMB, free:%dkb", memtotal / (1024*1024), mctrler_total() / 1024);
+	sprintf(s, "memory %dMB, free:%dkb", memtotal / (1024*1024), mctrler_total() >> 10);
 	sheet_put_str(sht_back, 0, 32, 0, 7, s, 30);
 	for (;;) {
 		// count++;
 		io_cli();
 		if (fifo_sts(&xmainfifobuf) == 0) {
-			task_sleep(tka);
+			task_sleep(task_mainloop);
 			io_sti();
 		} else {
 			i = fifo_get(&xmainfifobuf);
@@ -256,7 +232,7 @@ void MonkeyMain(void) {
 					if ((mouse_decoder.btn & 0x04) != 0) {
 						s[8] = 'C';
 					}
-					sheet_put_str(sht_back, 24, 16, 0, 7, s, 25);
+					sheet_put_str(sht_back, 24, 16, 0, 7, s, 30);
 					//隐藏鼠标
 					//draw_box(_backbuf, btif->xs, 10, mx, my, mx+12, my+12);
 					//重新计算mx,my
@@ -363,5 +339,38 @@ void task_b_main2(void)//struct sheet *sht_win_b
 			}
 		}
 	}
+}
+
+void init_kernel(void) {
+	//启动信息
+	btif = (struct BootInfo*) 0x0ff0;
+
+	//内存管理初始化
+	mcr = (struct mctrler *)MCTRLER_ADDR;
+	memtotal = getmem(0x400000, 0xfffffffff);
+	init_mctrler();
+	mctrler_free(0x1000, 0x9e000);
+	mctrler_free(0x400000, memtotal - 0x400000);
+
+	//GDT IDT PIC 初始化
+	init_gdtidt();
+	init_pic();
+	io_sti(); //初始化完成,放开cpu中断标志
+
+	init_pit();
+	io_outp8(PIC0_IMR, 0xf8); //放开键盘 && PIC1 PIT 11111000
+	io_outp8(PIC1_IMR, 0xef); //放开鼠标 11101111
+
+	//键鼠初始化
+	init_keyboard();
+	init_mouse();
+	mouse_decoder.st = 0;
+
+	//主循环任务
+	task_mainloop = task_init();
+	xmainfifobuf.tk = task_mainloop;
+	task_run(task_mainloop, 1, 0);
+
+	init_sctrler(btif->vram, btif->xs, btif->ys);
 }
 

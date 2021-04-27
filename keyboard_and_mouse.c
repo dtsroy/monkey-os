@@ -1,7 +1,5 @@
 #include "mkpack.h"
 
-extern struct sheet *sht_back;
-
 void wait_kr(void) {
 	for (;;) {
 		if ((io_inp8(P_KEYSTA) & 0x02) == 0) {
@@ -61,20 +59,14 @@ int mdecode(struct mdec *xmain, unsigned char *dat) {
 			}
 			return 0;
 		case 1:
-			sprintf(s, "dat0:%04d", dat);
-			sheet_put_str(sht_back, 0, 80, 16, 7, s, 10);
 			xmain->buf[0] = dat;
 			xmain->st = 2;
 			return 0;
 		case 2:
-			sprintf(s, "dat1:%04d", dat);
-			sheet_put_str(sht_back, 0, 96, 16, 7, s, 10);
 			xmain->buf[1] = dat;
 			xmain->st = 3;
 			return 0;
 		case 3:
-			sprintf(s, "dat2:%04d", dat);
-			sheet_put_str(sht_back, 0, 112, 16, 7, s, 10);
 			xmain->buf[2] = dat;
 			xmain->st = 1;
 			xmain->btn = xmain->buf[0] & 0x07; //取后3位
@@ -90,8 +82,6 @@ int mdecode(struct mdec *xmain, unsigned char *dat) {
 			xmain->st = 4;
 			return 0;
 		case 4:
-			sprintf(s, "dat3:%04d", dat);
-			sheet_put_str(sht_back, 0, 128, 16, 7, s, 10);
 			xmain->buf[3] = dat;
 			signed int tmp = (int)dat;
 			tmp &= 0xf;
