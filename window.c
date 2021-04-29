@@ -1,9 +1,11 @@
 #include "mkpack.h"
 
-struct mwindow *init_mwindow(char *title, struct sheet *sht, int xs, int ys) {
-	struct mwindow *xmain;
+struct mwindow *init_mwindow(char *title, int xs, int ys) {
+	ys += 16;
+	struct mwindow *xmain=mctrler_alloc(sizeof(struct mwindow));
 	xmain->title = title;
-	xmain->sht = sht;
+	xmain->sht = sctrler_alloc();
+	sheet_setbuf(xmain->sht, (unsigned char *)mctrler_alloc(xs * ys), xs, ys, -1);
 	xmain->xs = xs;
 	xmain->ys = ys;
 	return xmain;

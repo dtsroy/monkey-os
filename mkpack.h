@@ -188,7 +188,7 @@ struct mwindow {
 	int xs, ys;
 };
 
-struct mwindow *init_mwindow(char *title, struct sheet *sht, int xs, int ys);
+struct mwindow *init_mwindow(char *title, int xs, int ys);
 void mwindow_draw(struct mwindow *xmain);
 
 //timer.c
