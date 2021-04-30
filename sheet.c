@@ -1,16 +1,17 @@
 #include "mkpack.h"
 
+extern struct BootInfo *btif;
 extern struct sctrler *scr;
 
-void init_sctrler(unsigned int vram, int xs, int ys) {
+void init_sctrler(void) {
 	scr = mctrler_allocx(sizeof(struct sctrler));
 	int i;
 	if (scr == 0) {return;}
-	scr->map = (unsigned char *) mctrler_allocx(xs * ys);
+	scr->map = (unsigned char *) mctrler_allocx(btif->xs * btif->ys);
 	if (scr->map == 0) {return;}
-	scr->vram = vram;
-	scr->xs = xs;
-	scr->ys = ys;
+	// scr->vram = vram;
+	// btif->xs = xs;
+	// btif->ys = ys;
 	scr->top = -1;
 	for (i=0; i<MAX_SHEETS; i++) {
 		scr->shts0[i].flag = 0;
@@ -109,13 +110,13 @@ void sheet_refresh(struct sheet *sht, int bx0, int by0, int bx1, int by1) {
 
 void sctrler_refreshx(int vx0, int vy0, int vx1, int vy1, int h0, int h1) {
 	int h, bx, by, vx, vy, bx0, by0, bx1, by1;
-	unsigned char *buf, c, *vram=scr->vram, *map = scr->map, sid;
+	unsigned char *buf, c, *vram=btif->vram, *map = scr->map, sid;
 	struct sheet *sht;
 
 	if (vx0 < 0) {vx0 = 0;}
 	if (vy0 < 0) {vy0 = 0;}
-	if (vx1 > scr->xs) {vx1 = scr->xs;}
-	if (vy1 > scr->ys) {vy1 = scr->ys;}
+	if (vx1 > btif->xs) {vx1 = btif->xs;}
+	if (vy1 > btif->ys) {vy1 = btif->ys;}
 
 	for (h=0; h<=scr->top; h++) {
 		sht = scr->shts[h];
@@ -138,8 +139,8 @@ void sctrler_refreshx(int vx0, int vy0, int vx1, int vy1, int h0, int h1) {
 			for (bx=bx0; bx<bx1; bx++) {
 				vx = sht->vx0 + bx;
 				c = buf[by * sht->bxs + bx];
-				if (map[vy * scr->xs + vx] == sid) {
-					vram[vy * scr->xs + vx] = c;
+				if (map[vy * btif->xs + vx] == sid) {
+					vram[vy * btif->xs + vx] = c;
 				}
 			}
 		}
@@ -153,8 +154,8 @@ void sctrler_refreshmap(int vx0, int vy0, int vx1, int vy1, int h0) {
 
 	if (vx0 < 0) { vx0 = 0; }
 	if (vy0 < 0) { vy0 = 0; }
-	if (vx1 > scr->xs) { vx1 = scr->xs; }
-	if (vy1 > scr->ys) { vy1 = scr->ys; }
+	if (vx1 > btif->xs) { vx1 = btif->xs; }
+	if (vy1 > btif->ys) { vy1 = btif->ys; }
 
 	for (h = h0; h <= scr->top; h++) {
 		sht = scr->shts[h];
@@ -174,7 +175,7 @@ void sctrler_refreshmap(int vx0, int vy0, int vx1, int vy1, int h0) {
 			for (bx = bx0; bx < bx1; bx++) {
 				vx = sht->vx0 + bx;
 				if (buf[by * sht->bxs + bx] != sht->cliv) {
-					map[vy * scr->xs + vx] = sid;
+					map[vy * btif->xs + vx] = sid;
 				}
 			}
 		}

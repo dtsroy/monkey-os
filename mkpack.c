@@ -245,6 +245,6 @@ void init_kernel(void) {
 	xmainfifobuf.tk = task_mainloop;
 	task_run(task_mainloop, 1, 0);
 
-	init_sctrler(btif->vram, btif->xs, btif->ys);
+	init_sctrler();
 }
 

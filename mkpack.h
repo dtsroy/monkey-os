@@ -162,13 +162,13 @@ struct sheet {
 	int bxs, bys, vx0, vy0, cliv, height, flag;
 };
 struct sctrler {
-	unsigned char *vram, *map;
-	int xs, ys, top;
+	unsigned char *map;
+	int top;
 	struct sheet *shts[MAX_SHEETS];
 	struct sheet shts0[MAX_SHEETS];
 };
 
-void init_sctrler(unsigned int vram, int xs, int ys);
+void init_sctrler(void);
 struct sheet *sctrler_alloc(void);
 
 void sctrler_refreshx(int vx0, int vy0, int vx1, int vy1, int h0, int h1);
