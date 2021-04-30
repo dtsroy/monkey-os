@@ -48,13 +48,6 @@ void put_font(unsigned char *vram, int xsize, int x, int y, char color, unsigned
 void fin(void);
 unsigned char test486(void);
 
-struct textinfo {
-	char *text;
-	int bg, fg;
-	int len;
-};
-struct textinfo packText(char *text, int bg, int fg, int len);
-
 //init_dt.c
 struct SEGMENT_DESCRIPTOR {
 	short limit_low, base_low;
@@ -187,9 +180,21 @@ struct mwindow {
 	struct sheet *sht;
 	int xs, ys;
 };
-
 struct mwindow *init_mwindow(char *title, int xs, int ys);
 void mwindow_draw(struct mwindow *xmain);
+
+struct mwindow_Label {
+	struct mwindow *mw;
+	int x, y;
+	unsigned char bg, fg;
+	char *text;
+};
+struct mwindow_Label *mwindow_Label_alloc(struct mwindow *mw, int x, int y, unsigned char bg, unsigned char fg, char *text);
+void mwindow_Label_draw(struct mwindow_Label *xmain);
+void mwindow_Label_hide(struct mwindow_Label *xmain);
+void mwindow_Label_setX(struct mwindow_Label *xmain, int x);
+void mwindow_Label_setY(struct mwindow_Label *xmain, int y);
+void mwindow_Label_setText(struct mwindow_Label *xmain, char *text);
 
 //timer.c
 #define TIMER_F_ALLOC 1

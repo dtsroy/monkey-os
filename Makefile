@@ -1,10 +1,10 @@
 TOOLPATH = ..\\z_tools\\
 INCPATH  = ../z_tools/haribote/
 
-OBJS_MP = mkpack.obj func.obj graphic.obj \
-			tools.obj font.obj init_dt.obj int.obj \
-			fifo.obj keyboard_and_mouse.obj memory.obj \
-			sheet.obj window.obj timer.obj mktask.obj
+OBJS_MP = mkpack.o func.o graphic.o \
+			tools.o font.o init_dt.o int.o \
+			fifo.o keyboard_and_mouse.o memory.o \
+			sheet.o window.o timer.o mktask.o
 
 DEL = python bash.py del
 COPY = python bash.py copy
@@ -49,8 +49,8 @@ MonkeyOS.sys : asmhead.bin mkpack.hrb Makefile
 font.bin : font.txt Makefile
 	makefont font.txt font.bin
 
-font.obj : font.bin Makefile
-	bin2obj font.bin font.obj _xfont
+font.o : font.bin Makefile
+	bin2obj font.bin font.o _xfont
 
 %.gas : %.c mkpack.h Makefile
 	$(cc1) -o $*.gas $*.c
@@ -58,8 +58,8 @@ font.obj : font.bin Makefile
 %.nas : %.gas Makefile
 	$(gas2nask) $*.gas $*.nas
 
-%.obj : %.nas Makefile
-	$(nask) $*.nas $*.obj $*.lst
+%.o : %.nas Makefile
+	$(nask) $*.nas $*.o $*.lst
 
 asm :
 	$(make) ipl.bin
@@ -69,8 +69,8 @@ img :
 
 run :
 	$(make) img
-	$(COPY) MonkeyOS.img ..\z_tools\qemu\fdimage0.bin
-	$(make) -C ../z_tools/qemu
+# 	$(COPY) MonkeyOS.img ..\z_tools\qemu\fdimage0.bin
+# 	$(make) -C ../z_tools/qemu
 
 install :
 	$(make) img
@@ -80,19 +80,19 @@ clean :
 	-$(DEL) *.bin
 	-$(DEL) *.lst
 	-$(DEL) *.gas
-	-$(DEL) *.obj
+	-$(DEL) *.o
 	-$(DEL) *.bin
 	-$(DEL) *.lst
 	-$(DEL) *.gas
-	-$(DEL) *.obj
+	-$(DEL) *.o
 	-$(DEL) *.bin
 	-$(DEL) *.lst
 	-$(DEL) *.gas
-	-$(DEL) *.obj
+	-$(DEL) *.o
 	-$(DEL) *.bin
 	-$(DEL) *.lst
 	-$(DEL) *.gas
-	-$(DEL) *.obj
+	-$(DEL) *.o
 	-$(DEL) mkpack.nas
 	-$(DEL) mkpack.map
 	-$(DEL) mkpack.bim

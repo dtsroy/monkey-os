@@ -12,22 +12,18 @@ struct taskctrler *tkcr;
 struct mctrler *mcr;
 struct sctrler *scr;
 
-static char KEYDATA_SHIFT[84] = { //按下shift
+static char KEYDATA_SHIFT[58] = { //按下shift
 	0, 0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 0, 0,
 	'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', 0, 0, 'A', 'S',
 	'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~', 0, '|', 'Z', 'X', 'C', 'V',
-	'B', 'N', 'M', '<', '>', '?', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0
+	'B', 'N', 'M', '<', '>', '?', 0, 0, 0, 0
 };
 
-static char KEYDATA_UNSHIFT[84] = { //没按下shift
+static char KEYDATA_UNSHIFT[58] = { //没按下shift
 	0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 0, 0,
 	'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', 0, 0, 'a', 's',
 	'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\', 'z', 'x', 'c', 'v',
-	'b', 'n', 'm', ',', '.', '/', 0, 0, 0, ' ', 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0
+	'b', 'n', 'm', ',', '.', '/', 0, 0, 0, ' '
 };
 
 void MonkeyMain(void) {
@@ -75,13 +71,12 @@ void MonkeyMain(void) {
 	sheet_slide(sht_ms, mx, my);
 
 	//窗口测试
-	int wxs=144, wys=16;
-	// testwinbuf = mctrler_allocx(wxs*wys);
-	
-	struct mwindow *tw = init_mwindow("_test!`~'", wxs, wys);
+	int wxs=288, wys=640;
+	struct mwindow *tw = init_mwindow("xyz", wxs, wys);
 	sht_tw = tw->sht;
-	// sheet_setbuf(sht_tw, testwinbuf, wxs, wys, 6);
 	mwindow_draw(tw);
+	struct mwindow_Label *tl = mwindow_Label_alloc(tw, 0, 16, 16, 7, "hhh");
+	mwindow_Label_draw(tl);
 	int twx=200, twy=200;
 	sheet_slide(sht_tw, twx, twy);
 
@@ -110,7 +105,8 @@ void MonkeyMain(void) {
 				} else {
 					nowkeydata = KEYDATA_UNSHIFT;
 				}
-				if (i < 84) {
+				if (i < 58) {
+					//简化后的键盘解码只有58
 					if (nowkeydata[i] != 0 && cur_x < 8*17) {
 						//最多18字符
 						s[0] = nowkeydata[i];
@@ -160,19 +156,20 @@ void MonkeyMain(void) {
 				sheet_put_str(sht_back, 0, 64, 0, 7, s, 20);
 				if (mdecode(&mouse_decoder, i - M_DT0) != 0) {
 					//解析成功
-					sprintf(s, "mouse:[lcr %d %d] mid:%d", mouse_decoder.x, mouse_decoder.y, mouse_decoder.z);
+					sprintf(s, "mouse:[lcr %d %d] m:%d", mouse_decoder.x, mouse_decoder.y, mouse_decoder.z);
 					if ((mouse_decoder.btn & 0x01) != 0) {
 						s[7] = 'L';
+						mwindow_Label_setX(tl, 8);
 					}
 					if ((mouse_decoder.btn & 0x02) != 0) {
 						s[9] = 'R';
+						mwindow_Label_setX(tl, 2);
 					}
 					if ((mouse_decoder.btn & 0x04) != 0) {
 						s[8] = 'C';
+						mwindow_Label_setText(tl, "adfsdaf");
 					}
 					sheet_put_str(sht_back, 24, 16, 0, 7, s, 30);
-					//隐藏鼠标
-					//draw_box(_backbuf, btif->xs, 10, mx, my, mx+12, my+12);
 					//重新计算mx,my
 					mx += mouse_decoder.x;
 					my += mouse_decoder.y;
@@ -190,10 +187,7 @@ void MonkeyMain(void) {
 						my = btif->ys - 1;
 					}
 					sprintf(s, "(%d, %d)", mx, my);
-					draw_box(_backbuf, btif->xs, 0, 0, 0, 320, 16);
-					put_str(_backbuf, btif->xs, 0, 0, 7, s);
-					sheet_refresh(sht_back, 0, 0, 320, 16);
-					// sheet_refresh(sht_ms, 0, 16, 80, 16);
+					sheet_put_str(sht_back, 0, 0, 0, 7, s, 20);
 					sheet_slide(sht_ms, mx, my);
 				}
 				if (mouse_decoder.btn & 0x01 != 0) {
@@ -231,7 +225,7 @@ void init_kernel(void) {
 	init_pic();
 	io_sti(); //初始化完成,放开cpu中断标志
 
-	init_pit();
+	init_pit(); //初始化pit
 	io_outp8(PIC0_IMR, 0xf8); //放开键盘 && PIC1 PIT 11111000
 	io_outp8(PIC1_IMR, 0xef); //放开鼠标 11101111
 
