@@ -69,8 +69,8 @@ img :
 
 run :
 	$(make) img
-# 	$(COPY) MonkeyOS.img ..\z_tools\qemu\fdimage0.bin
-# 	$(make) -C ../z_tools/qemu
+	$(COPY) MonkeyOS.img ..\z_tools\qemu\fdimage0.bin
+	$(make) -C ../z_tools/qemu
 
 install :
 	$(make) img

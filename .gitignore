@@ -5,6 +5,6 @@
 *.map
 *.bim
 *.hrb
-*.obj
+*.o
 *.sys
 *.img

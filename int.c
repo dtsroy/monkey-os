@@ -5,6 +5,8 @@ extern struct tctrler *tcr;
 extern struct sheet *sht_back;
 extern struct timer *task_timer;
 
+// extern unsigned char ms_inited;
+
 void init_pic(void) {
 	io_outp8(PIC0_IMR, 0xff); //主PIC屏蔽所有中断
 	io_outp8(PIC1_IMR, 0xff); //从PIC屏蔽所有中断
@@ -40,7 +42,9 @@ void ihr2c(int *esp) { //鼠标中断
 	io_outp8(PIC1_OCW, 0x64);
 	io_outp8(PIC0_OCW, 0x62); //受理完毕
 	dat = io_inp8(P_KEYDAT);
+	// if (ms_inited) {
 	fifo_put(&xmainfifobuf, dat + M_DT0);
+	// }
 }
 
 void ihr20(int *esp) {

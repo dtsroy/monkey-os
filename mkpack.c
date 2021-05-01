@@ -2,6 +2,8 @@
 
 void init_kernel(void);
 
+// unsigned char ms_inited;
+
 struct fifo xmainfifobuf;
 unsigned int memtotal;
 struct mdec mouse_decoder;
@@ -11,6 +13,8 @@ struct tctrler *tcr;
 struct taskctrler *tkcr;
 struct mctrler *mcr;
 struct sctrler *scr;
+
+struct sheet *sht_back;
 
 static char KEYDATA_SHIFT[58] = { //按下shift
 	0, 0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 0, 0,
@@ -33,6 +37,7 @@ void MonkeyMain(void) {
 	unsigned int xbuf[512];
 	init_fifo(&xmainfifobuf, 512, xbuf, 0);
 
+	// ms_inited = 0; //鼠标未初始化
 	init_kernel();
 
 	unsigned char p_shift=0; //按下shift?
@@ -50,7 +55,7 @@ void MonkeyMain(void) {
 	char _mscur[12*12], *_backbuf, *testwinbuf;
 	
 	//图层相关
-	struct sheet *sht_back;
+	
 	struct sheet *sht_ms;
 	struct sheet *sht_tw;
 	int mx = (btif->xs - 12) / 2;
@@ -62,6 +67,10 @@ void MonkeyMain(void) {
 	
 	sheet_setbuf(sht_back, _backbuf, btif->xs, btif->ys, -1);
 	sheet_setbuf(sht_ms, _mscur, 12, 12, 99);
+
+	init_keyboard();
+	init_mouse();
+	mouse_decoder.st = 0;
 
 	//屏幕初始化1次
 	init_screen(_backbuf, btif->xs, btif->ys);
@@ -148,6 +157,13 @@ void MonkeyMain(void) {
 					//capslock
 					p_capslock = (p_capslock + 1) % 2;
 				}
+				if (i == 83) {
+					//del
+					mouse_decoder.st++;
+					if (mouse_decoder.st == 4) {
+						mouse_decoder.st = 1;
+					}
+				}
 
 				draw_box(sht_tw->buf, sht_tw->bxs, nowcur_color, cur_x, 16, cur_x + 8, 32);
 				sheet_refresh(sht_tw, cur_x, 16, cur_x + 8, 32);
@@ -167,7 +183,7 @@ void MonkeyMain(void) {
 					}
 					if ((mouse_decoder.btn & 0x04) != 0) {
 						s[8] = 'C';
-						mwindow_Label_setText(tl, "adfsdaf");
+						mwindow_Label_setText(tl,  "adfsdaf");
 					}
 					sheet_put_str(sht_back, 24, 16, 0, 7, s, 30);
 					//重新计算mx,my
@@ -230,9 +246,7 @@ void init_kernel(void) {
 	io_outp8(PIC1_IMR, 0xef); //放开鼠标 11101111
 
 	//键鼠初始化
-	init_keyboard();
-	init_mouse();
-	mouse_decoder.st = 0;
+
 
 	//主循环任务
 	task_mainloop = task_init();

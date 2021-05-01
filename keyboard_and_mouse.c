@@ -1,5 +1,9 @@
 #include "mkpack.h"
 
+extern struct sheet *sht_back;
+
+// extern unsigned char ms_inited;
+
 void wait_kr(void) {
 	for (;;) {
 		if ((io_inp8(P_KEYSTA) & 0x02) == 0) {
@@ -48,23 +52,29 @@ void init_mouse(void) {
 	io_outp8(P_KEYCMD, KEYCMD_SENDTO_MOUSE);
 	wait_kr();
 	io_outp8(P_KEYDAT, 80); //魔术序列:2
+	// int i;
+	// for (i=0; i<6; i++) {io_inp8(0x60);}
+	// ms_inited = 1;
 }
 
 int mdecode(struct mdec *xmain, unsigned char *dat) {
 	char *s;
 	switch (xmain->st) {
 		case 0:
-			if (dat == 0xfa) {
-				xmain->st = 3; //添加滚轮后防止数据错位
-			}
+			xmain->st = 1; //添加滚轮后防止数据错位
+			
 			return 0;
 		case 1:
 			xmain->buf[0] = dat;
 			xmain->st = 2;
+			sprintf(s, "dat1:%4d", dat);
+			sheet_put_str(sht_back, 0, 96, 0, 7, s, 9);
 			return 0;
 		case 2:
 			xmain->buf[1] = dat;
 			xmain->st = 3;
+			sprintf(s, "dat2:%4d", dat);
+			sheet_put_str(sht_back, 0, 112, 0, 7, s, 9);
 			return 0;
 		case 3:
 			xmain->buf[2] = dat;
@@ -80,6 +90,8 @@ int mdecode(struct mdec *xmain, unsigned char *dat) {
 			}
 			xmain->y = -xmain->y;
 			xmain->st = 4;
+			sprintf(s, "dat3:%4d", dat);
+			sheet_put_str(sht_back, 0, 128, 0, 7, s, 9);
 			return 0;
 		case 4:
 			xmain->buf[3] = dat;
@@ -100,6 +112,8 @@ int mdecode(struct mdec *xmain, unsigned char *dat) {
 					break;
 			}
 			xmain->st = 1;
+			sprintf(s, "dat4:%4d", dat);
+			sheet_put_str(sht_back, 0, 144, 0, 7, s, 9);
 			return 1;
 	}
 	return -1; //不能到这里,但还是保障一下
