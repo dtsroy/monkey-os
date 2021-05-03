@@ -1,6 +1,6 @@
-;启动区代码,FAT32
+;启动区代码,FAT12
 
-CYLS EQU 10 ;10柱面
+CYLS EQU 55 ;55柱面
 
 ORG 0x7c00 ;装载规定
 
@@ -24,7 +24,7 @@ DD 2880;
 DB 0,0,0x29;
 DD 0xffffffff;
 DB "MONKEYOS   " ;11字节
-DB "FAT32   " ;8_
+DB "FAT12   " ;8_
 RESB 18 ;空18字节
 
 ;主体
