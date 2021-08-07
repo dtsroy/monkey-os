@@ -1,7 +1,3 @@
-; haribote-os boot asm
-; TAB=4
-
-[INSTRSET "i486p"]
 
 VBEMODE	EQU		0x105			; 1024 x  768 x 8bit 彩色
 ; 显示模式
@@ -112,7 +108,6 @@ keystatus:
 
 ;	切换到保护模式
 
-[INSTRSET "i486p"]				; 说明使用486指令
 
 		LGDT	[GDTR0]			; 设置临时GDT
 		MOV		EAX,CR0
@@ -189,7 +184,7 @@ memcpy:
 
 		ALIGNB	16
 GDT0:
-		RESB	8				; 初始值
+		TIMES	8 DB 0				; 初始值
 		DW		0xffff,0x0000,0x9200,0x00cf	; 可以读写的段（segment）32bit
 		DW		0xffff,0x0000,0x9a28,0x0047	; 可执行的文件的32bit寄存器（bootpack用）
 

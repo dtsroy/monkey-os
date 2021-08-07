@@ -1,7 +1,7 @@
 #ifndef MKPACK_H
 #define MKPACK_H
 
-#include <stdio.h>
+// #include <stdio.h>
 
 struct BootInfo
 {

@@ -1,10 +1,2 @@
-*.img
-*.bin
-*.hrb
-*.lst
-*.map
-*.bim
-*.hrb
-*.o
-*.sys
-*.img
+/build/
+/release/

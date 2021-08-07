@@ -15,7 +15,7 @@ struct mctrler *mcr;
 struct sctrler *scr;
 
 struct sheet *sht_back;
-
+//http://www.highersoft.net/html/notice/notice_619.html
 static char KEYDATA_SHIFT[58] = { //按下shift
 	0, 0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 0, 0,
 	'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', 0, 0, 'A', 'S',
@@ -70,7 +70,7 @@ void MonkeyMain(void) {
 
 	init_keyboard();
 	init_mouse();
-	mouse_decoder.st = 0;
+	mouse_decoder.st = 2;
 
 	//屏幕初始化1次
 	init_screen(_backbuf, btif->xs, btif->ys);

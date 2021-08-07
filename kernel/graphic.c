@@ -115,9 +115,9 @@ void put_font(unsigned char *vram, int xsize, int x, int y, char color, unsigned
 }
 
 void put_str(unsigned char *vram, int xsize, int x, int y, char color, char *str) {
-	extern char xfont[4096];
+	extern char MonkeyOSMainFont[4096];
 	for (; *str!=0x00; str++) {
-		put_font(vram, xsize, x, y, color, xfont + *str * 16);
+		put_font(vram, xsize, x, y, color, MonkeyOSMainFont + *str * 16);
 		x += 8;
 	}
 }

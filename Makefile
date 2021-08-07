@@ -1,104 +1,60 @@
-TOOLPATH = ..\\z_tools\\
-INCPATH  = ../z_tools/haribote/
+OBJS_KERNEL = 	build/mkpack.kernel.o build/func.kernel.o build/graphic.kernel.o \
+				build/tools.kernel.o build/font.kernel.o build/init_dt.kernel.o build/int.kernel.o \
+				build/fifo.kernel.o build/keyboard_and_mouse.kernel.o build/memory.kernel.o \
+				build/sheet.kernel.o build/window.kernel.o build/timer.kernel.o build/mktask.kernel.o
 
-OBJS_MP = mkpack.o func.o graphic.o \
-			tools.o font.o init_dt.o int.o \
-			fifo.o keyboard_and_mouse.o memory.o \
-			sheet.o window.o timer.o mktask.o
+rulefile = res/rulefile.txt
+fontfile = res/font.txt
+fpdffile = res/default.fp
 
-DEL = python bash.py del
-COPY = python bash.py copy
+TARGET_SYS  = release/MonkeyOS.sys
+TARGET_IMG  = release/MonkeyOS.img
+TARGET_BOOT = release/boot.bsf
 
-make     = $(TOOLPATH)make.exe -r
-nask     = $(TOOLPATH)nask.exe
-cc1      = $(TOOLPATH)cc1.exe -I$(INCPATH) -Os -w -quiet -std=c99
-gas2nask = $(TOOLPATH)gas2nask.exe -a
-obj2bim  = $(TOOLPATH)obj2bim.exe
-bim2hrb  = $(TOOLPATH)bim2hrb.exe
-rulefile = rulefile.txt
-edimg    = $(TOOLPATH)edimg.exe
+del      = python tools/bash.py del
+copy     = python tools/bash.py copy
+mkf      = python tools/makefont.py
+make     = ../z_tools/make.exe # 注意:这个千万不要改
+obj2bim  = ../z_tools/obj2bim.exe
+bim2hrb  = ../z_tools/bim2hrb.exe
+edimg    = ../z_tools/edimg.exe
 
 default :
-	$(make) img
+	$(make) $(TARGET_IMG)
 
-# 镜像文件生成
+init:
+	-mkdir build/
+	-mkdir release/
 
-ipl.bin : ipl.nas Makefile
-	$(nask) ipl.nas ipl.bin ipl.lst
+$(TARGET_BOOT): startup/boot.asm Makefile
+	nasm -fbin $< -o $@
 
-asmhead.bin : asmhead.nas Makefile
-	$(nask) asmhead.nas asmhead.bin
+build/asmhead.bin: startup/asmhead.asm Makefile
+	nasm -fbin $< -o $@
 
-MonkeyOS.img : ipl.bin MonkeyOS.sys Makefile
-	$(edimg)   imgin:../z_tools/fdimg0at.tek \
-		wbinimg src:ipl.bin len:512 from:0 to:0 \
-		copy from:MonkeyOS.sys to:@: \
-		imgout:MonkeyOS.img
+$(TARGET_IMG): $(TARGET_BOOT) $(TARGET_SYS) Makefile
+	$(edimg)	imgin:$(fpdffile) \
+				wbinimg src:$< len:512 from:0 to:0 \
+				copy from:$(TARGET_SYS) to:@: \
+				imgout:$@
 
-mkpack.bim : $(OBJS_MP) Makefile
-	$(obj2bim) @$(rulefile) out:mkpack.bim stack:3136k map:mkpack.map \
-		$(OBJS_MP)
-# 3MB+64KB=3136KB
+build/kernel.bim: $(OBJS_KERNEL)
+	$(obj2bim) @$(rulefile) out:$@ stack:3136k map:build/kernel.map $^
 
-mkpack.hrb : mkpack.bim Makefile
-	$(bim2hrb) mkpack.bim mkpack.hrb 0
+build/kernel.hrb: build/kernel.bim Makefile
+	$(bim2hrb) $< $@ 0
 
-MonkeyOS.sys : asmhead.bin mkpack.hrb Makefile
-	$(COPY) /B asmhead.bin+mkpack.hrb MonkeyOS.sys
+$(TARGET_SYS): build/asmhead.bin build/kernel.hrb
+	cat $^ > $@
 
-font.bin : font.txt Makefile
-	makefont font.txt font.bin
+build/font.kernel.o: $(fontfile) Makefile
+	$(mkf) $< build/font_.c
+	gcc -c build/font_.c -o $@ -m32
 
-font.o : font.bin Makefile
-	bin2obj font.bin font.o _xfont
+build/%.kernel.o: kernel/%.c Makefile
+	# 注意:千万不要换成gcc -c,后果自负
+	cc1 $< -m32 -std=c99 -o build/$*.kernel.s -I include/
+	as --32 build/$*.kernel.s -o $@
 
-%.gas : %.c mkpack.h Makefile
-	$(cc1) -o $*.gas $*.c
-
-%.nas : %.gas Makefile
-	$(gas2nask) $*.gas $*.nas
-
-%.o : %.nas Makefile
-	$(nask) $*.nas $*.o $*.lst
-
-asm :
-	$(make) ipl.bin
-
-img :
-	$(make) MonkeyOS.img
-
-run :
-	$(make) img
-	$(COPY) MonkeyOS.img ..\z_tools\qemu\fdimage0.bin
-	$(make) -C ../z_tools/qemu
-
-install :
-	$(make) img
-	../z_tools/imgtol.com w a: MonkeyOS.img
-
-clean :
-	-$(DEL) *.bin
-	-$(DEL) *.lst
-	-$(DEL) *.gas
-	-$(DEL) *.o
-	-$(DEL) *.bin
-	-$(DEL) *.lst
-	-$(DEL) *.gas
-	-$(DEL) *.o
-	-$(DEL) *.bin
-	-$(DEL) *.lst
-	-$(DEL) *.gas
-	-$(DEL) *.o
-	-$(DEL) *.bin
-	-$(DEL) *.lst
-	-$(DEL) *.gas
-	-$(DEL) *.o
-	-$(DEL) mkpack.nas
-	-$(DEL) mkpack.map
-	-$(DEL) mkpack.bim
-	-$(DEL) mkpack.hrb
-	-$(DEL) MonkeyOS.sys
-
-src_only :
-	$(make) clean
-	-del MonkeyOS.img
+build/func.kernel.o:kernel/func.nas Makefile
+	nasm -fwin32 $< -o $@
