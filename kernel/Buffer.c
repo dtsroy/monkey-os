@@ -1,4 +1,4 @@
-#include "mkpack.h"
+#include "kernel/Buffer.h"
 
 void init_fifo(struct fifo *xmain, int size, unsigned int *buf, struct task *tk) {
 	xmain->sz = size;

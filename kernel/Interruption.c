@@ -1,11 +1,9 @@
-#include "mkpack.h"
+#include "kernel/Interruption.h"
 
 extern struct fifo xmainfifobuf;
 extern struct tctrler *tcr;
 extern struct sheet *sht_back;
 extern struct timer *task_timer;
-
-// extern unsigned char ms_inited;
 
 void init_pic(void) {
 	io_outp8(PIC0_IMR, 0xff); //主PIC屏蔽所有中断
@@ -42,9 +40,7 @@ void ihr2c(int *esp) { //鼠标中断
 	io_outp8(PIC1_OCW, 0x64);
 	io_outp8(PIC0_OCW, 0x62); //受理完毕
 	dat = io_inp8(P_KEYDAT);
-	// if (ms_inited) {
 	fifo_put(&xmainfifobuf, dat + M_DT0);
-	// }
 }
 
 void ihr20(int *esp) {
@@ -62,7 +58,6 @@ void ihr20(int *esp) {
 			break;
 		}
 		/* 超时 */
-		// sheet_put_str(sht_back, 0, 96, 0, 7, "timeout!!!", 10);
 		timer->flags = TIMER_F_ALLOC;
 		if (timer != task_timer) {
 			fifo_put(timer->fifobuf, timer->data);

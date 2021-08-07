@@ -1,15 +1,12 @@
-#include "mkpack.h"
+#include "kernel/Graphic.h"
 
 void init_screen(unsigned char *vram, int xs, int ys) {
 	draw_box(vram, xs, 0, 0, 0, xs, ys);//主桌面
 	put_str(vram, xs, 0, 0, 7, "Hello from MonkeyOS.");
-	// char *info_to_show;
-	// sprintf(info_to_show, "screen.xsize=%d, screen.ysize=%d", xs, ys);
-	// put_str(vram, xs, 0, 15, 3, info_to_show);
 }
 
 void init_palette(void){
-	static unsigned char table_rgb[16 * 3] = {
+	static unsigned char table_rgb[17 * 3] = {
 		0x00, 0x00, 0x00,	/*  0:黑 */
 		0xff, 0x00, 0x00,	/*  1:梁红 */
 		0x00, 0xff, 0x00,	/*  2:亮绿 */
@@ -57,19 +54,19 @@ void draw_box(unsigned char *vram, int xs, unsigned char color, int x0, int y0, 
 }
 
 void init_pointer(unsigned char *msbuf, int bg) {
-	static char pointer[12][12] = {
-		"*..............",
-		"*0*............",
-		"*000*..........",
-		"*00000*........",
-		"*0000000*......",
-		"*000000000*....",
-		"*00000000000*..",
-		"*000*0000*****.",
-		"*00*.*000*.....",
-		"*0*...*000*....",
-		"**.....*000*...",
-		"........*****.."
+	static char pointer[12][14] = {
+		"*.............",
+		"*0*...........",
+		"*000*.........",
+		"*00000*.......",
+		"*0000000*.....",
+		"*000000000*...",
+		"*00000000000*.",
+		"*000*0000*****",
+		"*00*.*000*....",
+		"*0*...*000*...",
+		"**.....*000*..",
+		"........*****."
 	};
 	int x, y;
 	for (y=0; y<12; y++) {

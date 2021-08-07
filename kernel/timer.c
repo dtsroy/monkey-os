@@ -1,4 +1,4 @@
-#include "mkpack.h"
+#include "kernel/Timer.h"
 
 extern struct tctrler *tcr;
 
@@ -43,11 +43,9 @@ void timer_init(struct timer *xmain, struct fifo *fifobuf, int data) {
 }
 
 void timer_set(struct timer *xmain, unsigned int timeout) {
-	// int e;
 	struct timer *t, *s;
 	xmain->timeout = timeout + tcr->count;
 	xmain->flags = TIMER_F_USING;
-	// e = io_load_eflags();
 	io_cli();
 	t = tcr->t0;
 	if (xmain->timeout <= t->timeout) {
@@ -55,7 +53,6 @@ void timer_set(struct timer *xmain, unsigned int timeout) {
 		tcr->t0 = xmain;
 		xmain->next = t; /* 下面是设定t */
 		tcr->next = xmain->timeout;
-		// io_save_eflags(e);
 		io_sti();
 		return;
 	}
@@ -66,7 +63,6 @@ void timer_set(struct timer *xmain, unsigned int timeout) {
 		/* 插入s和t之间的情况 */
 			s->next = xmain; /* s下一个是timer */
 			xmain->next = t; /* timer的下一个是t */
-			// io_save_eflags(e);
 			io_sti();
 			return;
 		}

@@ -1,4 +1,4 @@
-#include "mkpack.h"
+#include "kernel/MonkeyOS.h"
 
 void init_kernel(void);
 

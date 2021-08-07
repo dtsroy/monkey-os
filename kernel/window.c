@@ -1,4 +1,4 @@
-#include "mkpack.h"
+#include "kernel/Window.h"
 
 struct mwindow *init_mwindow(char *title, int xs, int ys) {
 	ys += 16;

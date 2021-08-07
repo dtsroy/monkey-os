@@ -1,4 +1,4 @@
-#include "mkpack.h"
+#include "kernel/Memory.h"
 
 extern struct mctrler *mcr;
 
@@ -137,12 +137,5 @@ unsigned int mctrler_allocx(unsigned int size) {
 	unsigned int ret;
 	size = (size + 0xfff) & 0xfffff000;
 	ret = mctrler_alloc(size);
-	return ret;
-}
-
-int mctrler_freex(unsigned int addr, unsigned int size) {
-	int ret;
-	size = (size + 0xfff) & 0xfffff000;
-	ret = mctrler_free(addr, size);
 	return ret;
 }
