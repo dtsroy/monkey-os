@@ -1,13 +1,11 @@
 [BITS 32]						; 3制作32位模式用的机器语言
 
-		GLOBAL	_io_hlt, _io_cli, _io_sti, _io_outp8
-		GLOBAL _io_load_eflags, _io_save_eflags
-		GLOBAL _load_gdtr, _load_idtr
-		GLOBAL _ihr21x, _ihr27x, _ihr2cx, _ihr20x
-		GLOBAL _io_inp8, _io_shlt
-		GLOBAL _load_cr0, _save_cr0
-		GLOBAL _getmemx, __shutdown
-		GLOBAL _load_tr, _jmpfar
+		GLOBAL	_io_hlt,	_io_cli,	_io_sti,	_io_outp8
+		GLOBAL _io_load_eflags,			_io_save_eflags
+		GLOBAL _load_gdtr,	_load_idtr
+		GLOBAL _ihr21x,		_ihr27x,	_ihr2cx,	_ihr20x
+		GLOBAL _io_inp8,	_io_shlt,	_load_cr0,	_save_cr0
+		GLOBAL _getmemx,	_load_tr,	_jmpfar,	_fin
 
 		EXTERN _ihr21, _ihr27, _ihr2c, _ihr20
 
@@ -172,16 +170,15 @@ gmfin:
 	POP EDI
 	RET
 
-__shutdown:
-	MOV AX, 0x2001
-	MOV DX, 0x1004
-	OUT DX, AX
-	;RET
-
 _load_tr:
 	LTR [ESP+4]
 	RET
 
 _jmpfar:
 	JMP FAR [ESP+4]
+	RET
+
+_fin:
+	HLT
+	JMP _fin
 	RET

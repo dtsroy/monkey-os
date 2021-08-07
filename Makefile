@@ -1,7 +1,8 @@
-OBJS_KERNEL = 	build/mkpack.kernel.o build/func.kernel.o build/graphic.kernel.o \
-				build/tools.kernel.o build/font.kernel.o build/init_dt.kernel.o build/int.kernel.o \
-				build/fifo.kernel.o build/keyboard_and_mouse.kernel.o build/memory.kernel.o \
-				build/sheet.kernel.o build/window.kernel.o build/timer.kernel.o build/mktask.kernel.o
+OBJS_KERNEL =	build/MonkeyOS.kernel.o	build/Functions.kernel.o	build/Graphic.kernel.o \
+				build/font.kernel.o		build/Window.kernel.o		build/SystemStructure.kernel.o \
+				build/Buffer.kernel.o	build/Sheet.kernel.o		build/keyboard_and_mouse.kernel.o \
+				build/Memory.kernel.o	build/Timer.kernel.o		build/Interruption.kernel.o \
+				build/Task.kernel.o
 
 rulefile = res/rulefile.txt
 fontfile = res/font.txt
@@ -19,8 +20,11 @@ obj2bim  = ../z_tools/obj2bim.exe
 bim2hrb  = ../z_tools/bim2hrb.exe
 edimg    = ../z_tools/edimg.exe
 
-default :
+VMX = "D:\\Program Files\\vms\\test_mbk\\BackupTest.vmx"
+
+run:
 	$(make) $(TARGET_IMG)
+	vmware -x $(VMX)
 
 init:
 	-mkdir build/
@@ -56,5 +60,5 @@ build/%.kernel.o: kernel/%.c Makefile
 	cc1 $< -m32 -std=c99 -o build/$*.kernel.s -I include/
 	as --32 build/$*.kernel.s -o $@
 
-build/func.kernel.o:kernel/func.nas Makefile
+build/Functions.kernel.o:kernel/Functions.asm Makefile
 	nasm -fwin32 $< -o $@
