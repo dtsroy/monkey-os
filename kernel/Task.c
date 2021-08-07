@@ -78,7 +78,7 @@ struct task *task_init(void) {
 	timer_set(task_timer, ret->priority);
 
 	idle = task_alloc();
-	idle->_tss.esp = mctrler_allocx(64*1024) + 64*1024;
+	idle->_tss.esp = (int)mctrler_allocx(64*1024) + 64*1024;
 	idle->_tss.eip = (int) &fin;
 	idle->_tss.es = 8;
 	idle->_tss.cs = 16;

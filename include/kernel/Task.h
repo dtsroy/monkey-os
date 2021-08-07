@@ -4,6 +4,7 @@
 #include "kernel/Memory.h"
 #include "kernel/Functions.h"
 #include "kernel/SystemStructure.h"
+#include "kernel/Timer.h"
 
 #define MAX_TASKS		1000	// 最大任务数量
 #define TASK_GDT0		3		// gdt 分配的初始值

@@ -2,7 +2,7 @@ OBJS_KERNEL =	build/MonkeyOS.kernel.o	build/Functions.kernel.o	build/Graphic.ker
 				build/font.kernel.o		build/Window.kernel.o		build/SystemStructure.kernel.o \
 				build/Buffer.kernel.o	build/Sheet.kernel.o		build/Keyboard.kernel.o \
 				build/Memory.kernel.o	build/Timer.kernel.o		build/Interruption.kernel.o \
-				build/Task.kernel.o		build/Mouse.kernel.o
+				build/Task.kernel.o		build/Mouse.kernel.o		build/MonkeyStdlib.kernel.o
 
 rulefile = res/rulefile.txt
 fontfile = res/font.txt
@@ -26,7 +26,7 @@ VMX = "D:\\Program Files\\vms\\MonkeyOS\\MonkeyOS.vmx"
 .PHONY:init
 
 run:
-	$(make) -s $(TARGET_IMG)
+	$(make) $(TARGET_IMG)
 	vmware -x $(VMX)
 
 init:

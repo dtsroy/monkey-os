@@ -2,7 +2,6 @@
 #define MOUSE_KERNEL_H
 
 #include "kernel/Functions.h"
-#include "kernel/Sheet.h"
 #include "kernel/Keyboard.h"
 
 #define KEYCMD_SENDTO_MOUSE	0xd4
@@ -16,6 +15,6 @@ struct mdec {
 };
 
 void init_mouse(void);
-int mdecode(struct mdec *xmain, unsigned char *dat);
+int mdecode(struct mdec *xmain, int dat);
 
 #endif

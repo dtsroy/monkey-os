@@ -22,8 +22,8 @@ void fin(void);
 unsigned char test486(void);
 void init_mctrler(void);
 unsigned int mctrler_total(void);
-unsigned int mctrler_alloc(unsigned int size);
-int mctrler_free(unsigned int addr, unsigned int size);
-unsigned int mctrler_allocx(unsigned int size);
+void *mctrler_alloc(unsigned int size);
+int mctrler_free(void *_addr, unsigned int size);
+void *mctrler_allocx(unsigned int size);
 
 #endif

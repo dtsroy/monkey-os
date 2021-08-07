@@ -3,6 +3,7 @@
 
 #include "kernel/Functions.h"
 #include "kernel/Memory.h"
+#include "kernel/Graphic.h"
 
 #define MAX_SHEETS 256
 

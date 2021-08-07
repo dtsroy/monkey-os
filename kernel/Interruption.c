@@ -24,7 +24,7 @@ void init_pic(void) {
 }
 
 void ihr21(int *esp) { //键盘中断
-	unsigned char *dat;
+	int dat;
 	io_outp8(PIC0_OCW, 0x61); //IQR1受理完毕
 	dat = io_inp8(P_KEYDAT);
 	fifo_put(&xmainfifobuf, dat + K_DT0);

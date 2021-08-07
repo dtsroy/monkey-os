@@ -231,10 +231,10 @@ void init_kernel(void) {
 
 	//内存管理初始化
 	mcr = (struct mctrler *)MCTRLER_ADDR;
-	memtotal = getmem(0x400000, 0xffffffffffffffff);
+	memtotal = getmem(0x400000, 0xffffffff);
 	init_mctrler();
-	mctrler_free(0x1000, 0x9e000);
-	mctrler_free(0x400000, memtotal - 0x400000);
+	mctrler_free((void*)0x1000, 0x9e000);
+	mctrler_free((void*)0x400000, memtotal - 0x400000);
 
 	//GDT IDT PIC 初始化
 	init_gdtidt();

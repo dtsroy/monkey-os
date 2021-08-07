@@ -56,7 +56,7 @@ unsigned int mctrler_total() {
 	return ret;
 }
 
-unsigned int mctrler_alloc(unsigned int size) {
+void *mctrler_alloc(unsigned int size) {
 	unsigned int it, ret;
 	for (it = 0; it<mcr->frees; it++) {
 		if (mcr->free[it].size >= size) {
@@ -70,14 +70,15 @@ unsigned int mctrler_alloc(unsigned int size) {
 					mcr->free[it] = mcr->free[it+1]; //整体偏移
 				}
 			}
-			return ret;
+			return (void*)ret;
 		}
 	}
 	return 0;
 }
 
-int mctrler_free(unsigned int addr, unsigned int size) {
+int mctrler_free(void *_addr, unsigned int size) {
 	int i, j;
+	unsigned int addr = (unsigned int)_addr;
 	//决定插入索引
 	for (i=0; i<mcr->frees; i++) {
 		if (mcr->free[i].addr > addr) {
@@ -133,9 +134,6 @@ int mctrler_free(unsigned int addr, unsigned int size) {
 	return -1;
 }
 
-unsigned int mctrler_allocx(unsigned int size) {
-	unsigned int ret;
-	size = (size + 0xfff) & 0xfffff000;
-	ret = mctrler_alloc(size);
-	return ret;
+void *mctrler_allocx(unsigned int size) {
+	return mctrler_alloc((size + 0xfff) & 0xfffff000);
 }

@@ -4,6 +4,7 @@
 #include "kernel/Memory.h"
 #include "kernel/Sheet.h"
 #include "kernel/Graphic.h"
+#include "kernel/MonkeyStdlib.h"
 
 struct mwindow {
 	char *title;
@@ -20,6 +21,7 @@ struct mwindow_Label {
 	unsigned char bg, fg;
 	char *text;
 };
+
 struct mwindow_Label *mwindow_Label_alloc(struct mwindow *mw, int x, int y, unsigned char bg, unsigned char fg, char *text);
 void mwindow_Label_draw(struct mwindow_Label *xmain);
 void mwindow_Label_hide(struct mwindow_Label *xmain);

@@ -13,5 +13,6 @@
 #include "kernel/Task.h"
 #include "kernel/Timer.h"
 #include "kernel/Window.h"
+#include "kernel/MonkeyStdlib.h"
 
 #endif
