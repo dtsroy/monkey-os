@@ -13,18 +13,14 @@ void task_add(struct task *xmain) {
 	l->tasks[l->running] = xmain; //长度=末尾索引+1
 	l->running++;
 	xmain->flag = 2; //运行
+	return;
 }
 
 void task_remove(struct task *xmain) {
 	int index;
 	struct task_level *l = &tkcr->levels[xmain->level];
 
-	for (index=0; index<l->running; index++) {
-		if (l->tasks[index] == xmain) {
-			break;
-		}
-	}
-
+	for (index=0; index<l->running && l->tasks[index] != xmain; index++);
 	l->running--;
 	if (index < l->now) {
 		l->now--;
@@ -38,17 +34,15 @@ void task_remove(struct task *xmain) {
 	for (; index < l->running; index++) {
 		l->tasks[index] = l->tasks[index+1];
 	}
+	return;
 }
 
 void task_switchx(void) {
 	int i; //当前最高活跃level
-	for (i=0; i<MAX_TASKLEVELS; i++) {
-		if (tkcr->levels[i].running > 0) {
-			break;
-		}
-	}
+	for (i=0; i<MAX_TASKLEVELS && tkcr->levels[i].running <= 0; i++);
 	tkcr->nl = i;
 	tkcr->clv = 0;
+	return;
 }
 
 struct task *task_init(void) {
@@ -137,6 +131,7 @@ void task_run(struct task *xmain, int level, int priority) {
 		task_add(xmain);
 	}
 	tkcr->clv = 1;
+	return;
 }
 
 void task_switch(void) {
@@ -155,6 +150,7 @@ void task_switch(void) {
 	if (newt != nowt) {
 		jmpfar(0, newt->sel);
 	}
+	return;
 }
 
 void task_sleep(struct task *xmain) {
@@ -169,4 +165,5 @@ void task_sleep(struct task *xmain) {
 			jmpfar(0, nowt->sel);
 		}
 	}
+	return;
 }

@@ -3,7 +3,7 @@
 extern struct mctrler *mcr;
 
 unsigned char test486(void) {
-	char is486 = 0;
+	unsigned char is486 = 0;
 	unsigned int ef;
 	//确认cpu386还是486以上
 	ef = io_load_eflags();
@@ -11,10 +11,9 @@ unsigned char test486(void) {
 	io_save_eflags(ef);
 	ef = io_load_eflags();
 
-	if ((ef & EFLAGS_AC_BIT) != 0) {
+	if (ef & EFLAGS_AC_BIT) {
 		is486 = 1; //ac不为0,cpu有ac标志位
 	}
-
 	ef &= ~EFLAGS_AC_BIT; //退回ac位
 	io_save_eflags(ef);
 	return is486;
@@ -23,21 +22,17 @@ unsigned char test486(void) {
 unsigned int getmem(unsigned int start, unsigned int end) {
 	char is486 = test486();
 	unsigned int cr0, ret;
-
 	if (is486 == 1) {
 		cr0 = load_cr0();
 		cr0 |= CR0_CACHE_DISABLE;
 		save_cr0(cr0);
 	}
-
 	ret = getmemx(start, end);
-
 	if (is486 == 1) {
 		cr0 = load_cr0();
 		cr0 &= ~CR0_CACHE_DISABLE;
 		save_cr0(cr0);
 	}
-
 	return ret;
 }
 
@@ -63,7 +58,7 @@ void *mctrler_alloc(unsigned int size) {
 			ret = mcr->free[it].addr;
 			mcr->free[it].addr += size; //起始地址后移
 			mcr->free[it].size -= size;
-			if (mcr->free[it].size == 0) {
+			if (!mcr->free[it].size) {
 				//已经保证>=0
 				mcr->frees--;
 				for (; it<mcr->frees; it++) {

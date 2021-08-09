@@ -11,7 +11,7 @@ void init_fifo(struct fifo *xmain, int size, unsigned int *buf, struct task *tk)
 }
 
 int fifo_put(struct fifo *xmain, int dat) {
-	if (xmain->free == 0) {
+	if (!xmain->free) {
 		//溢出了
 		xmain->flag = 1;
 		return -1;
@@ -23,7 +23,7 @@ int fifo_put(struct fifo *xmain, int dat) {
 		xmain->wp = 0;
 	}
 	xmain->free--;
-	if (xmain->tk != 0) {
+	if (xmain->tk) {
 		if (xmain->tk->flag != 2) {
 			//休眠中需唤醒
 			task_run(xmain->tk, -1, 0);

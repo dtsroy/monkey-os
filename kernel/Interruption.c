@@ -28,10 +28,11 @@ void ihr21(int *esp) { //键盘中断
 	io_outp8(PIC0_OCW, 0x61); //IQR1受理完毕
 	dat = io_inp8(P_KEYDAT);
 	fifo_put(&xmainfifobuf, dat + K_DT0);
+	return;
 }
 
 void ihr27(int *esp) { //别管这是啥了
-	io_outp8(PIC0_OCW, 0x67); /* 通知PIC的IRQ-07（参考7-1） */
+	io_outp8(PIC0_OCW, 0x67);
 	return;
 }
 
@@ -41,6 +42,7 @@ void ihr2c(int *esp) { //鼠标中断
 	io_outp8(PIC0_OCW, 0x62); //受理完毕
 	dat = io_inp8(P_KEYDAT);
 	fifo_put(&xmainfifobuf, dat + M_DT0);
+	return;
 }
 
 void ihr20(int *esp) {
@@ -48,15 +50,9 @@ void ihr20(int *esp) {
 	unsigned char ts=0;
 	io_outp8(PIC0_OCW, 0x60); /* 把IRQ-00接收信号结束的信息通知给PIC */
 	tcr->count++;
-	if (tcr->next > tcr->count) {
-		return;
-	}
+	if (tcr->next > tcr->count) {return;}
 	timer = tcr->t0; /* 首先把最前面的地址赋给timer */
-	for (;;) {
-	/* 因为timers的定时器都处于运行状态，所以不确认flags */
-		if (timer->timeout > tcr->count) {
-			break;
-		}
+	while (timer->timeout <= tcr->count) {
 		/* 超时 */
 		timer->flags = TIMER_F_ALLOC;
 		if (timer != task_timer) {
@@ -68,8 +64,6 @@ void ihr20(int *esp) {
 	}
 	tcr->t0 = timer;
 	tcr->next = timer->timeout;
-	if (ts != 0) {
-		task_switch();
-	}
+	if (ts) {task_switch();}
 	return;
 }

@@ -1,9 +1,6 @@
 #include "kernel/Graphic.h"
 
-void init_screen(unsigned char *vram, int xs, int ys) {
-	draw_box(vram, xs, 0, 0, 0, xs, ys);//主桌面
-	put_str(vram, xs, 0, 0, 7, "Hello from MonkeyOS.");
-}
+extern struct BootInfo *btif;
 
 void init_palette(void){
 	static unsigned char table_rgb[17 * 3] = {
@@ -30,17 +27,16 @@ void init_palette(void){
 }
 
 void set_palette(int start, int end, unsigned char *tb) {
-	int i, eflags;
-	eflags = io_load_eflags();
+	int i;
 	io_cli(); //禁止中断
 	io_outp8(0x03c8, start);
 	for (i=start; i<=end; i++) {
-		io_outp8(0x03c9, tb[0] / 4);
-		io_outp8(0x03c9, tb[1] / 4);
-		io_outp8(0x03c9, tb[2] / 4);
+		io_outp8(0x03c9, tb[0] >> 2);
+		io_outp8(0x03c9, tb[1] >> 2);
+		io_outp8(0x03c9, tb[2] >> 2);
 		tb += 3;
 	}
-	io_save_eflags(eflags);
+	io_sti();
 	return;
 }
 
@@ -100,20 +96,20 @@ void put_font(unsigned char *vram, int xsize, int x, int y, char color, unsigned
 	for (i=0; i<16; i++) {
 		vaddr = vram + (y+i) * xsize + x;
 		dat = font[i];
-		if ((dat & 0x80) != 0) {vaddr[0] = color;}
-		if ((dat & 0x40) != 0) {vaddr[1] = color;}
-		if ((dat & 0x20) != 0) {vaddr[2] = color;}
-		if ((dat & 0x10) != 0) {vaddr[3] = color;}
-		if ((dat & 0x08) != 0) {vaddr[4] = color;}
-		if ((dat & 0x04) != 0) {vaddr[5] = color;}
-		if ((dat & 0x02) != 0) {vaddr[6] = color;}
-		if ((dat & 0x01) != 0) {vaddr[7] = color;}
+		if (dat & 0x80) {vaddr[0] = color;}
+		if (dat & 0x40) {vaddr[1] = color;}
+		if (dat & 0x20) {vaddr[2] = color;}
+		if (dat & 0x10) {vaddr[3] = color;}
+		if (dat & 0x08) {vaddr[4] = color;}
+		if (dat & 0x04) {vaddr[5] = color;}
+		if (dat & 0x02) {vaddr[6] = color;}
+		if (dat & 0x01) {vaddr[7] = color;}
 	}
 }
 
 void put_str(unsigned char *vram, int xsize, int x, int y, char color, char *str) {
-	extern char MonkeyOSMainFont[4096];
-	for (; *str!=0x00; str++) {
+	extern char MonkeyOSMainFont[];
+	for (; *str; str++) {
 		put_font(vram, xsize, x, y, color, MonkeyOSMainFont + *str * 16);
 		x += 8;
 	}

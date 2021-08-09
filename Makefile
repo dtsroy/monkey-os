@@ -24,6 +24,7 @@ VMX = "D:\\Program Files\\vms\\MonkeyOS\\MonkeyOS.vmx"
 
 .PHONY:run
 .PHONY:init
+.PHONY:clean
 
 run:
 	$(make) $(TARGET_IMG)
@@ -33,6 +34,10 @@ init:
 	-mkdir build/
 	-mkdir release/
 
+clean:
+	-rm -f build/*
+	-rm -f release/*
+
 $(TARGET_BOOT): startup/boot.asm Makefile
 	@nasm -fbin $< -o $@
 
@@ -40,16 +45,16 @@ build/asmhead.bin: startup/asmhead.asm Makefile
 	@nasm -fbin $< -o $@
 
 $(TARGET_IMG): $(TARGET_BOOT) $(TARGET_SYS) Makefile
-	$(edimg)	imgin:$(fpdffile) \
+	@$(edimg)	imgin:$(fpdffile) \
 				wbinimg src:$< len:512 from:0 to:0 \
 				copy from:$(TARGET_SYS) to:@: \
 				imgout:$@
 
 build/kernel.bim: $(OBJS_KERNEL)
-	$(obj2bim) @$(rulefile) out:$@ stack:3136k map:build/kernel.map $^
+	@$(obj2bim) @$(rulefile) out:$@ stack:3136k map:build/kernel.map $^
 
 build/kernel.hrb: build/kernel.bim Makefile
-	$(bim2hrb) $< $@ 0
+	@$(bim2hrb) $< $@ 0
 
 $(TARGET_SYS): build/asmhead.bin build/kernel.hrb
 	@cat $^ > $@
@@ -59,7 +64,7 @@ build/font.kernel.o: $(fontfile) Makefile
 	@gcc -c build/font_.c -o $@ -m32
 
 build/%.kernel.o: kernel/%.c include/kernel/%.h Makefile # 注意:千万不要换成gcc -c,后果自负
-	@cc1 $< -m32 -std=c99 -o build/$*.kernel.s -I include/
+	@cc1 $< -m32 -std=c99 -o build/$*.kernel.s -I include/ -Os
 	@as --32 build/$*.kernel.s -o $@
 
 build/Functions.kernel.o:kernel/Functions.asm Makefile

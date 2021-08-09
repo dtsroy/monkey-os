@@ -2,20 +2,23 @@
 
 void init_kernel(void);
 
-// unsigned char ms_inited;
-
 struct fifo xmainfifobuf;
 unsigned int memtotal;
 struct mdec mouse_decoder;
-struct BootInfo *btif;
+// 其他指针
+struct BootInfo *btif=(struct BootInfo*)0x0ff0;
 struct task *task_mainloop;
+char *_mscur;
+// 控制器
 struct tctrler *tcr;
 struct taskctrler *tkcr;
 struct mctrler *mcr;
 struct sctrler *scr;
-
+// 全局图层
 struct sheet *sht_back;
-//http://www.highersoft.net/html/notice/notice_619.html
+struct sheet *sht_ms;
+int mx=0, my=0;
+
 static char KEYDATA_SHIFT[58] = { //按下shift
 	0, 0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 0, 0,
 	'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', 0, 0, 'A', 'S',
@@ -33,11 +36,11 @@ static char KEYDATA_UNSHIFT[58] = { //没按下shift
 void MonkeyMain(void) {
 	char *s;
 	int i;
-	
-	unsigned int xbuf[512];
-	init_fifo(&xmainfifobuf, 512, xbuf, 0);
 
-	// ms_inited = 0; //鼠标未初始化
+	// 直接用栈空间,因为主函数死循环
+	unsigned int bbuf[512];
+	init_fifo(&xmainfifobuf, 512, bbuf, 0);
+
 	init_kernel();
 
 	unsigned char p_shift=0; //按下shift?
@@ -51,36 +54,11 @@ void MonkeyMain(void) {
 	timer_set(cur_timer, 50); //0.5s
 
 	//显示相关
-	init_palette();
-	char _mscur[12*12], *_backbuf, *testwinbuf;
-	
-	//图层相关
-	
-	struct sheet *sht_ms;
+	char *testwinbuf;
 	struct sheet *sht_tw;
-	int mx = (btif->xs - 12) / 2;
-	int my = (btif->ys - 12 - 14) / 2;
-
-	sht_back = sctrler_alloc();
-	sht_ms = sctrler_alloc();
-	_backbuf = (unsigned char *) mctrler_allocx(btif->xs * btif->ys);
-	
-	sheet_setbuf(sht_back, _backbuf, btif->xs, btif->ys, -1);
-	sheet_setbuf(sht_ms, _mscur, 12, 12, 99);
-
-	init_keyboard();
-	init_mouse();
-	mouse_decoder.st = 2;
-
-	//屏幕初始化1次
-	init_screen(_backbuf, btif->xs, btif->ys);
-	init_pointer(_mscur, 99);
-
-	sheet_slide(sht_back, 0, 0);
-	sheet_slide(sht_ms, mx, my);
 
 	//窗口测试
-	int wxs=288, wys=640;
+	int wxs=120, wys=120;
 	struct mwindow *tw = init_mwindow("xyz", wxs, wys);
 	sht_tw = tw->sht;
 	mwindow_draw(tw);
@@ -88,15 +66,10 @@ void MonkeyMain(void) {
 	mwindow_Label_draw(tl);
 	int twx=200, twy=200;
 	sheet_slide(sht_tw, twx, twy);
-
 	int cur_x=0;
 	int nowcur_color=16;
-
-	sheet_setheight(sht_back, 0);
 	sheet_setheight(sht_tw, 1);
-	sheet_setheight(sht_ms, 2);
-	sprintf(s, "memory %dMB, free:%dkb", memtotal / (1024*1024), mctrler_total() >> 10);
-	sheet_put_str(sht_back, 0, 32, 0, 7, s, 30);
+
 	for (;;) {
 		io_cli();
 		if (fifo_sts(&xmainfifobuf) == 0) {
@@ -245,14 +218,32 @@ void init_kernel(void) {
 	io_outp8(PIC0_IMR, 0xf8); //放开键盘 && PIC1 PIT 11111000
 	io_outp8(PIC1_IMR, 0xef); //放开鼠标 11101111
 
-	//键鼠初始化
+	// 键鼠(因为缓冲区在主函数call这个函数前已经初始化)
+	init_keyboard();
+	init_mouse();
+	mouse_decoder.st = 2;
 
+	//图层管理初始化
+	init_palette(); // 先初始化硬件
+	init_sctrler();
+
+	// 指针
+	_mscur = mctrler_alloc(144);
+	init_pointer(_mscur, 99);
+
+	// 初始化图层
+	sht_back = sctrler_alloc();
+	sht_ms = sctrler_alloc();
+	sheet_setbuf(sht_back, (unsigned char*)mctrler_alloc(btif->xs*btif->ys), btif->xs, btif->ys, -1);
+	sheet_setbuf(sht_ms, _mscur, 12, 12, 99);
+	sheet_slide(sht_back, 0, 0);
+	sheet_slide(sht_ms, mx, my);
+	sheet_setheight(sht_back, 0);
+	sheet_setheight(sht_ms, 2);
 
 	//主循环任务
 	task_mainloop = task_init();
 	xmainfifobuf.tk = task_mainloop;
 	task_run(task_mainloop, 1, 0);
 
-	init_sctrler();
 }
-

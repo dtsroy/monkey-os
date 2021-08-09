@@ -1,11 +1,8 @@
 #include "kernel/Keyboard.h"
 
 void wait_kr(void) {
-	for (;;) {
-		if ((io_inp8(P_KEYSTA) & 0x02) == 0) {
-			return;
-		}
-	}
+	while (io_inp8(P_KEYSTA) & 0x02);
+	return;
 }
 
 void init_keyboard(void) {

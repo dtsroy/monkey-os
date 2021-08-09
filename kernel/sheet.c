@@ -4,18 +4,14 @@ extern struct BootInfo *btif;
 extern struct sctrler *scr;
 
 void init_sctrler(void) {
-	scr = mctrler_allocx(sizeof(struct sctrler));
 	int i;
-	if (scr == 0) {return;}
+	scr = mctrler_allocx(sizeof(struct sctrler));
 	scr->map = (unsigned char *) mctrler_allocx(btif->xs * btif->ys);
-	if (scr->map == 0) {return;}
-	// scr->vram = vram;
-	// btif->xs = xs;
-	// btif->ys = ys;
 	scr->top = -1;
 	for (i=0; i<MAX_SHEETS; i++) {
 		scr->shts0[i].flag = 0;
 	}
+	return;
 }
 
 struct sheet *sctrler_alloc(void) {
@@ -26,7 +22,6 @@ struct sheet *sctrler_alloc(void) {
 			ret = &scr->shts0[i];
 			ret->flag = 1;
 			ret->height = -1;
-			// ret->scr = xmain;
 			return ret;
 		}
 	}
@@ -38,6 +33,7 @@ void sheet_setbuf(struct sheet *xmain, unsigned char *buf, int xs, int ys, int c
 	xmain->bxs = xs;
 	xmain->bys = ys;
 	xmain->cliv = cliv;
+	return;
 }
 
 void sheet_setheight(struct sheet *sht, int height) {
@@ -99,6 +95,7 @@ void sheet_setheight(struct sheet *sht, int height) {
 		sctrler_refreshmap(sht->vx0, sht->vy0, sht->vx0 + sht->bxs, sht->vy0 + sht->bys, height);
 		sctrler_refreshx(sht->vx0, sht->vy0, sht->vx0 + sht->bxs, sht->vy0 + sht->bys, height, height);
 	}
+	return;
 }
 
 void sheet_refresh(struct sheet *sht, int bx0, int by0, int bx1, int by1) {
@@ -106,6 +103,7 @@ void sheet_refresh(struct sheet *sht, int bx0, int by0, int bx1, int by1) {
 		//显示中
 		sctrler_refreshx(sht->vx0 + bx0, sht->vy0 + by0, sht->vx0 + bx1, sht->vy0 + by1, sht->height, sht->height);
 	}
+	return;
 }
 
 void sctrler_refreshx(int vx0, int vy0, int vx1, int vy1, int h0, int h1) {
@@ -145,6 +143,7 @@ void sctrler_refreshx(int vx0, int vy0, int vx1, int vy1, int h0, int h1) {
 			}
 		}
 	}
+	return;
 }
 
 void sctrler_refreshmap(int vx0, int vy0, int vx1, int vy1, int h0) {
@@ -180,6 +179,7 @@ void sctrler_refreshmap(int vx0, int vy0, int vx1, int vy1, int h0) {
 			}
 		}
 	}
+	return;
 }
 
 void sheet_slide(struct sheet *sht, int vx0, int vy0) {
@@ -192,6 +192,7 @@ void sheet_slide(struct sheet *sht, int vx0, int vy0) {
 		sctrler_refreshx(ox, oy, ox+sht->bxs, oy+sht->bys, 0, sht->height-1);
 		sctrler_refreshx(vx0, vy0, vx0 + sht->bxs, vy0 + sht->bys, sht->height, sht->height);
 	}
+	return;
 }
 
 void sheet_free(struct sheet *sht) {
@@ -199,10 +200,12 @@ void sheet_free(struct sheet *sht) {
 		sheet_setheight(sht, -1);
 	}
 	sht->flag = 0;
+	return;
 }
 
 void sheet_put_str(struct sheet *xmain, int x, int y, int bg, int fg, char *text, int len) {
 	draw_box(xmain->buf, xmain->bxs, bg, x, y, x + len * 8, y + 16);
 	put_str(xmain->buf, xmain->bxs, x, y, fg, text);
 	sheet_refresh(xmain, x, y, x + len * 8, y + 16);
+	return;
 }
