@@ -14,5 +14,6 @@
 #include "kernel/Timer.h"
 #include "kernel/Window.h"
 #include "kernel/MonkeyStdlib.h"
+#include "kernel/InitKernel.h"
 
 #endif
